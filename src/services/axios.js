@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { API_BASE_URL } from '../utils/constants';
+import { API_BASE_URL, COOKIE_OPTIONS } from '../utils/constants';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -73,7 +73,7 @@ api.interceptors.response.use(
 
         const { token } = response.data;
         
-        Cookies.set('token', token, { expires: 7, secure: true, sameSite: 'strict' });
+        Cookies.set('token', token, COOKIE_OPTIONS);
         
         api.defaults.headers.common.Authorization = `Bearer ${token}`;
         originalRequest.headers.Authorization = `Bearer ${token}`;
