@@ -1,8 +1,6 @@
 /**
  * Application-wide constants
  */
-
-
 export const Roles = {
     ADMIN: 'admin',
     CUSTOMER: 'customer',

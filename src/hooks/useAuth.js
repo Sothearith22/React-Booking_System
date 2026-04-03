@@ -1,21 +1,20 @@
-import { useContext } from 'react';
-import AuthContext from '../context/AuthContext';
+import { useAuth as useAuthContext } from '../context/AuthContext';
 
-export const useAuth = () => {
-   const context = useContext(AuthContext);
+export const useAuth = () => useAuthContext();
 
-   if(!context){
-    throw new Error('useAuth must be used within an AuthProvider');
-   }
-   return context;
+// Role checker
+export const useHasRole = (allowedRoles) => {
+  const { user } = useAuth();
 
+  if (!user?.role) return false;
+
+  const userRoles = Array.isArray(user.role)
+    ? user.role
+    : [user.role];
+
+  const roles = Array.isArray(allowedRoles)
+    ? allowedRoles
+    : [allowedRoles];
+
+  return userRoles.some((role) => roles.includes(role));
 };
-
-/*
-  Hook to Check if current user has specific role
- */
-export const useHasRole = (requiredRole) => {
-  const {user} = useAuth();
-  return haaAnyRole(user?.role , allowedRoles);
-}
-
