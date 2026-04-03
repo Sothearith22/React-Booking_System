@@ -1,13 +1,19 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { isAdminUser } from '../utils/auth';
 
 export const MainLayout = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
   const linkClassName = ({ isActive }) =>
     `rounded-full px-4 py-2 text-sm font-medium transition ${
       isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-200'
     }`;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
@@ -45,7 +51,7 @@ export const MainLayout = () => {
                 ) : null}
                 <button
                   type="button"
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-200"
                 >
                   Logout

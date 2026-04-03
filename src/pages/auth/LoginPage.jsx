@@ -1,23 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import useFetch from '../../hooks/useFetch';
 import { validateForm } from '../../utils/validateForm';
 
-export default function LoginPage({ onSwitch }) {
+export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [values, setValues] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    data: status,
+    loading: isSubmitting,
+    run: submitLogin,
+    reset,
+  } = useFetch(login);
+
+  useEffect(() => {
+    if (status?.status === 'success' && status.redirectTo) {
+      navigate(status.redirectTo, { replace: true });
+    }
+  }, [navigate, status]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setValues((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: '' }));
+    reset();
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     const nextErrors = validateForm('login', values);
 
@@ -26,19 +38,7 @@ export default function LoginPage({ onSwitch }) {
       return;
     }
 
-    setIsSubmitting(true);
-    setStatus(null);
-
-    try {
-      const result = await login(values);
-      setStatus(result);
-
-      if (result.status === 'success' && result.redirectTo) {
-        navigate(result.redirectTo, { replace: true });
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    submitLogin({ ...values });
   };
 
   return (
@@ -99,7 +99,11 @@ export default function LoginPage({ onSwitch }) {
 
       <p className="text-sm text-slate-600">
         Need an account?{' '}
-        <button type="button" onClick={onSwitch} className="font-semibold text-sky-600">
+        <button
+          type="button"
+          onClick={() => navigate('/register', { replace: true })}
+          className="font-semibold text-sky-600"
+        >
           Create one
         </button>
       </p>

@@ -7,7 +7,23 @@ export const getUserRoles = (user) => {
 
   return roleValues
     .filter(Boolean)
-    .map((role) => String(role).toLowerCase());
+    .flatMap((role) => {
+      if (typeof role === 'string' || typeof role === 'number') {
+        return [String(role).toLowerCase()];
+      }
+
+      if (typeof role === 'object' && role !== null) {
+        return [
+          role.name,
+          role.role,
+          role.slug,
+        ]
+          .filter(Boolean)
+          .map((value) => String(value).toLowerCase());
+      }
+
+      return [];
+    });
 };
 
 export const isAdminUser = (user) => getUserRoles(user).includes('admin');

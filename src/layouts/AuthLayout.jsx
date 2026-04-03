@@ -1,15 +1,9 @@
-import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Login from '../pages/auth/LoginPage';
 import Register from '../pages/auth/RegisterPage';
 
 export function AuthLayout({ initialMode = 'login' }) {
   const { isAuthenticated, loading, user, logout } = useAuth();
-  const [mode, setMode] = useState(initialMode);
-
-  useEffect(() => {
-    setMode(initialMode);
-  }, [initialMode]);
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center text-slate-600 font-sans">Loading...</div>;
@@ -67,10 +61,10 @@ export function AuthLayout({ initialMode = 'login' }) {
                 </button>
               </div>
             ) : (
-              mode === 'login' ? (
-                <Login onSwitch={() => setMode('register')} />
+              initialMode === 'login' ? (
+                <Login />
               ) : (
-                <Register onSwitch={() => setMode('login')} />
+                <Register />
               )
             )}
           </div>
