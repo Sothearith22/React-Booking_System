@@ -1,110 +1,110 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { API_BASE_URL } from '../utils/constants';
+import { COOKIE_OPTIONS } from '../utils/constants';
+import { config } from '../utils/config';
+
+const TOKEN_COOKIE = 'token';
+const AUTH_BYPASS_PATHS = ['/login', '/refresh', '/register', '/logout'];
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: config.API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
 });
 
-// Flag to prevent multiple refresh requests
+// Refresh control
 let isRefreshing = false;
 let failedQueue = [];
 
+const shouldBypassRefresh = (requestConfig) => {
+  const url = requestConfig?.url || '';
+
+  return AUTH_BYPASS_PATHS.some((path) => url.includes(path));
+};
+
+// Process queued requests
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
+    if (error) prom.reject(error);
+    else prom.resolve(token);
   });
-  
   failedQueue = [];
 };
 
-// Add a request interceptor to include auth token
+//  Attach token to every request
 api.interceptors.request.use(
-  (config) => {
-    const token = Cookies.get('token');
+  requestConfig => {
+    const token = Cookies.get(TOKEN_COOKIE);
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      requestConfig.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+
+    return requestConfig;
   },
-  (error) => Promise.reject(error)
+  error => Promise.reject(error)
 );
 
-// Add a response interceptor for handling common errors and automatic refresh
+// refresh token
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  res => res,
+  async error => {
     const originalRequest = error.config;
 
-    // Handle 401 Unauthorized (Token Expired or Invalid)
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      // If we are already on login page, just reject
-      if (window.location.pathname === '/login' || originalRequest.url.includes('/login')) {
-        return Promise.reject(error);
-      }
+    if (
+      !originalRequest ||
+      error.response?.status !== 401 ||
+      originalRequest._retry ||
+      shouldBypassRefresh(originalRequest) ||
+      !Cookies.get(TOKEN_COOKIE)
+    ) {
+      return Promise.reject(error);
+    }
 
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(token => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api(originalRequest);
-          })
-          .catch(err => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Attempt to refresh the token
-        const response = await axios.post(`${API_BASE_URL}/refresh`, {}, {
-          headers: { Authorization: `Bearer ${Cookies.get('token')}` }
-        });
-
-        const { token } = response.data;
-        
-        Cookies.set('token', token, { expires: 7, secure: true, sameSite: 'strict' });
-        
-        api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      }).then(token => {
         originalRequest.headers.Authorization = `Bearer ${token}`;
-        
-        processQueue(null, token);
         return api(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        
-        // Refresh failed, logout user
-        Cookies.remove('token');
-        Cookies.remove('user');
-        
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login?expired=true';
-        }
-        
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
+      });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      const res = await api.post('/refresh');
+      const token =
+        res.data?.token ||
+        res.data?.access_token ||
+        res.data?.accessToken ||
+        null;
+
+      if (!token) {
+        throw new Error('Refresh response did not include a token.');
       }
-    }
 
-    // Handle 403 Forbidden (Account Suspended or Unauthorized Role)
-    if (error.response?.status === 403) {
-      const message = error.response.data?.message || 'Access denied';
-      console.error(message);
-      // You might want to show a notification here
-    }
+      Cookies.set(TOKEN_COOKIE, token, COOKIE_OPTIONS);
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      originalRequest.headers.Authorization = `Bearer ${token}`;
 
-    return Promise.reject(error);
+      processQueue(null, token);
+      return api(originalRequest);
+    } catch (err) {
+      processQueue(err, null);
+
+      Cookies.remove(TOKEN_COOKIE);
+      delete api.defaults.headers.common.Authorization;
+
+      //  Trigger global logout event
+      window.dispatchEvent(new Event('auth:logout'));
+
+      return Promise.reject(err);
+    } finally {
+      isRefreshing = false;
+    }
   }
 );
 
