@@ -1,35 +1,38 @@
-import { Link, Outlet } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { Outlet, useLocation } from 'react-router-dom';
+import DashboardHeader from '../features/dashboard/components/DashboardHeader';
+import DashboardSidebar from '../features/dashboard/components/DashboardSidebar';
+import { navItems } from '../features/dashboard/dashboardData';
 
 export const AdminLayout = () => {
-  const { user, logout } = useAuth();
+  const location = useLocation();
+
+  const currentPage =
+    navItems.find((item) => item.to === location.pathname) || navItems[0];
+
+  const dateLabel = new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date());
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <header className="border-b border-slate-800">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Dashboard</p>
-            <h1 className="text-xl font-semibold text-white">Welcome, {user?.name || 'Traveler'}</h1>
-          </div>
+    <div className="min-h-screen bg-zinc-100 text-zinc-950">
+      <div className="mx-auto flex min-h-screen max-w-[1720px] flex-col xl:flex-row">
+        <DashboardSidebar navItems={navItems} />
 
-          <div className="flex items-center gap-3">
-  
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+        <main className="min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8 xl:py-6">
+          <DashboardHeader
+            dateLabel={dateLabel}
+            title={currentPage.headerTitle}
+            subtitle={currentPage.headerSubtitle}
+          />
 
-      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-        <Outlet />
-      
-      </main>
+          <div className="mt-6 space-y-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

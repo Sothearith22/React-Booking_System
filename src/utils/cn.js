@@ -1,11 +1,26 @@
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+const toClassName = (value) => {
+  if (!value) {
+    return '';
+  }
 
-/**
- * Merges Tailwind CSS classes with clsx logic
- * @param {...string} inputs 
- * @returns {string}
- */
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(toClassName).filter(Boolean).join(' ');
+  }
+
+  if (typeof value === 'object') {
+    return Object.entries(value)
+      .filter(([, enabled]) => Boolean(enabled))
+      .map(([className]) => className)
+      .join(' ');
+  }
+
+  return '';
+};
+
 export function cn(...inputs) {
-  return twMerge(clsx(inputs));
+  return inputs.map(toClassName).filter(Boolean).join(' ');
 }

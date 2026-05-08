@@ -6,7 +6,24 @@ import { getDefaultRedirectPath } from '../utils/auth';
 
 const AuthContext = createContext();
 
+const isUserLike = (value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  return ['id', 'name', 'email', 'role', 'roles'].some((key) => key in value);
+};
+
 const getAuthPayload = (data) => {
+  const userCandidates = [
+    data?.user,
+    data?.account,
+    data?.data?.user,
+    data?.data?.account,
+    data?.data,
+    data,
+  ];
+
   return {
     token:
       data?.token ||
@@ -16,12 +33,7 @@ const getAuthPayload = (data) => {
       data?.data?.access_token ||
       data?.data?.accessToken ||
       null,
-    user:
-      data?.user ||
-      data?.account ||
-      data?.data?.user ||
-      data?.data?.account ||
-      null,
+    user: userCandidates.find(isUserLike) || null,
   };
 };
 
@@ -58,6 +70,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const clearSession = () => {
+    Cookies.remove('token');
+    setUser(null);
+    setLoading(false);
+  };
+
   // ✅ Load user from API (source of truth)
   const fetchUser = async () => {
     try {
@@ -65,9 +83,13 @@ export const AuthProvider = ({ children }) => {
       const { user } = getAuthPayload(res.data);
       setUser(user);
       return user;
-    } catch {
+    } catch (error) {
       setUser(null);
-      Cookies.remove('token');
+
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        clearSession();
+      }
+
       return null;
     } finally {
       setLoading(false);
@@ -91,7 +113,7 @@ export const AuthProvider = ({ children }) => {
 
   // 🔥 Listen logout from axios
   useEffect(() => {
-    const handleLogout = () => logout();
+    const handleLogout = () => clearSession();
     window.addEventListener('auth:logout', handleLogout);
 
     return () => window.removeEventListener('auth:logout', handleLogout);
@@ -159,8 +181,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     }
 
-    Cookies.remove('token');
-    setUser(null);
+    clearSession();
   };
 
   return createElement(

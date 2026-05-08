@@ -1,12 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 const useFetch = (fetcher, options = {}) => {
-  const {
-    onSuccess,
-    onError,
-    onSettled,
-    clearDataOnRun = true,
-  } = options;
+  const { onSuccess, onError, onSettled, clearDataOnRun = true} = options;
   const [request, setRequest] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
