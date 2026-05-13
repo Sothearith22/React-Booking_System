@@ -1,17 +1,30 @@
-import { createContext, createElement, useContext, useEffect, useState } from 'react';
+import { createContext, createElement, useCallback, useContext, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { authService } from '../services/api';
 import { COOKIE_OPTIONS } from '../utils/constants';
-import { getDefaultRedirectPath } from '../utils/auth';
+import { extractAuthToken, extractAuthUser, getDefaultRedirectPath, normalizeAuthUser } from '../utils/auth';
 
 const AuthContext = createContext();
+const TOKEN_COOKIE = 'token';
+const USER_STORAGE_KEY = 'auth:user';
 
 const isUserLike = (value) => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return false;
   }
 
-  return ['id', 'name', 'email', 'role', 'roles'].some((key) => key in value);
+  return [
+    'id',
+    'name',
+    'email',
+    'role',
+    'roles',
+    'user_type',
+    'role_name',
+    'roleName',
+    'role_id',
+    'roleId',
+  ].some((key) => key in value);
 };
 
 const getAuthPayload = (data) => {
@@ -24,16 +37,11 @@ const getAuthPayload = (data) => {
     data,
   ];
 
+  const fallbackUser = userCandidates.find(isUserLike);
+
   return {
-    token:
-      data?.token ||
-      data?.access_token ||
-      data?.accessToken ||
-      data?.data?.token ||
-      data?.data?.access_token ||
-      data?.data?.accessToken ||
-      null,
-    user: userCandidates.find(isUserLike) || null,
+    token: extractAuthToken(data),
+    user: extractAuthUser(data) || (fallbackUser ? normalizeAuthUser(fallbackUser) : null),
   };
 };
 
@@ -66,23 +74,78 @@ const getErrorFields = (error) => {
   );
 };
 
+const getStoredUser = () => {
+  try {
+    const rawValue = window.localStorage.getItem(USER_STORAGE_KEY);
+
+    if (!rawValue) {
+      return null;
+    }
+
+    const parsedValue = JSON.parse(rawValue);
+    return isUserLike(parsedValue) ? normalizeAuthUser(parsedValue) : null;
+  } catch {
+    return null;
+  }
+};
+
+const storeUser = (user) => {
+  try {
+    if (!user) {
+      window.localStorage.removeItem(USER_STORAGE_KEY);
+      return;
+    }
+
+    window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(normalizeAuthUser(user)));
+  } catch {
+    // Ignore storage write failures and keep auth working in memory.
+  }
+};
+
+const mergeUserData = (storedUser, freshUser) => {
+  if (!freshUser) {
+    return null;
+  }
+
+  const normalizedFreshUser = normalizeAuthUser(freshUser);
+
+  if (!storedUser) {
+    return normalizedFreshUser;
+  }
+
+  const hasFreshRole = Object.prototype.hasOwnProperty.call(normalizedFreshUser, 'role');
+  const hasFreshRoles = Object.prototype.hasOwnProperty.call(normalizedFreshUser, 'roles');
+
+  return {
+    ...storedUser,
+    ...normalizedFreshUser,
+    ...(hasFreshRole ? {} : { role: storedUser.role }),
+    ...(hasFreshRoles ? {} : { roles: storedUser.roles }),
+  };
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const clearSession = () => {
-    Cookies.remove('token');
+  const clearSession = useCallback(() => {
+    Cookies.remove(TOKEN_COOKIE, COOKIE_OPTIONS);
+    storeUser(null);
     setUser(null);
     setLoading(false);
-  };
+  }, []);
 
   // ✅ Load user from API (source of truth)
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       const res = await authService.me();
       const { user } = getAuthPayload(res.data);
-      setUser(user);
-      return user;
+      const nextUser = mergeUserData(getStoredUser(), user);
+
+      setUser(nextUser);
+      storeUser(nextUser);
+
+      return nextUser;
     } catch (error) {
       setUser(null);
 
@@ -94,13 +157,14 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [clearSession]);
 
   useEffect(() => {
     const init = async () => {
-      const token = Cookies.get('token');
+      const token = Cookies.get(TOKEN_COOKIE);
 
       if (!token) {
+        storeUser(null);
         setLoading(false);
         return;
       }
@@ -109,7 +173,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     init();
-  }, []);
+  }, [fetchUser]);
 
   // 🔥 Listen logout from axios
   useEffect(() => {
@@ -117,7 +181,7 @@ export const AuthProvider = ({ children }) => {
     window.addEventListener('auth:logout', handleLogout);
 
     return () => window.removeEventListener('auth:logout', handleLogout);
-  }, []);
+  }, [clearSession]);
 
   //  Login
   const login = async (credentials) => {
@@ -126,24 +190,26 @@ export const AuthProvider = ({ children }) => {
       const { token, user: loginUser } = getAuthPayload(res.data);
 
       if (token) {
-        Cookies.set('token', token, COOKIE_OPTIONS);
+        Cookies.set(TOKEN_COOKIE, token, COOKIE_OPTIONS);
       }
 
       const currentUser = loginUser || await fetchUser();
+      const nextUser = mergeUserData(getStoredUser(), currentUser);
 
-      if (!currentUser) {
+      if (!nextUser) {
         return {
           status: 'error',
           message: 'Login succeeded, but user data could not be loaded.',
         };
       }
 
-      setUser(currentUser);
+      setUser(nextUser);
+      storeUser(nextUser);
 
       return {
         status: 'success',
         message: 'Signed in successfully.',
-        redirectTo: getDefaultRedirectPath(currentUser),
+        redirectTo: getDefaultRedirectPath(nextUser),
       };
     } catch (error) {
       return {
@@ -184,6 +250,10 @@ export const AuthProvider = ({ children }) => {
     clearSession();
   };
 
+  const loginWithGoogle = async () => {
+    throw new Error('Google sign-in is not configured yet.');
+  };
+
   return createElement(
     AuthContext.Provider,
     {
@@ -192,6 +262,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated: !!user,
         login,
+        loginWithGoogle,
         register,
         logout,
       },

@@ -1,26 +1,24 @@
-const toClassName = (value) => {
+const flattenValue = (value) => {
   if (!value) {
-    return '';
-  }
-
-  if (typeof value === 'string') {
-    return value;
+    return [];
   }
 
   if (Array.isArray(value)) {
-    return value.map(toClassName).filter(Boolean).join(' ');
+    return value.flatMap(flattenValue);
   }
 
   if (typeof value === 'object') {
     return Object.entries(value)
       .filter(([, enabled]) => Boolean(enabled))
-      .map(([className]) => className)
-      .join(' ');
+      .map(([className]) => className);
   }
 
-  return '';
+  return [String(value)];
 };
 
 export function cn(...inputs) {
-  return inputs.map(toClassName).filter(Boolean).join(' ');
+  return inputs
+    .flatMap(flattenValue)
+    .filter(Boolean)
+    .join(' ');
 }
