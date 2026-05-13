@@ -6,6 +6,11 @@ const ROLE_ID_MAP = {
   2: ROLES.CUSTOMER,
 };
 
+export const DASHBOARD_HOME_PATH = '/admin/dashboard';
+export const CUSTOMER_HOME_PATH = '/customer';
+export const CUSTOMER_PROFILE_PATH = '/customer/profile';
+export const ADMIN_WORKSPACE_ROLES = [ROLES.ADMIN, ROLES.MANAGER, ROLES.STAFF];
+
 const ROLE_NAME_MAP = {
   admin: ROLES.ADMIN,
   manager: ROLES.MANAGER,
@@ -57,7 +62,12 @@ export const extractRoleName = (source) => {
   }
 
   if (typeof source === 'object') {
-    const directRole = source.role ?? source.roles ?? source.user_type;
+    const directRole =
+      source.role ??
+      source.roles ??
+      source.user_type ??
+      source.role_name ??
+      source.roleName;
 
     if (directRole && directRole !== source) {
       const nestedRole = extractRoleName(directRole);
@@ -117,7 +127,17 @@ export const extractAuthUser = (payload) => {
     directUser &&
     typeof directUser === 'object' &&
     !Array.isArray(directUser) &&
-    ('id' in directUser || 'email' in directUser || 'role' in directUser)
+    (
+      'id' in directUser ||
+      'email' in directUser ||
+      'role' in directUser ||
+      'roles' in directUser ||
+      'user_type' in directUser ||
+      'role_name' in directUser ||
+      'roleName' in directUser ||
+      'role_id' in directUser ||
+      'roleId' in directUser
+    )
   ) {
     return normalizeAuthUser(directUser);
   }
@@ -156,17 +176,23 @@ export const getApiErrorMessage = (error, fallback = 'Something went wrong.') =>
 export const getHomePathForRole = (role) => {
   const normalizedRole = extractRoleName(role);
 
-  if ([ROLES.ADMIN,ROLES.STAFF].includes(normalizedRole)) {
-    return '/admin/dashboard';
+  if (ADMIN_WORKSPACE_ROLES.includes(normalizedRole)) {
+    return DASHBOARD_HOME_PATH;
   }
 
-  return '/customer';
+  return CUSTOMER_HOME_PATH;
 };
 
 export const getUserRoles = (user) => {
   const roleValues = [
     user?.role,
     user?.role?.name,
+    user?.roles,
+    user?.user_type,
+    user?.role_name,
+    user?.roleName,
+    user?.role_id,
+    user?.roleId,
     ...(Array.isArray(user?.roles) ? user.roles : []),
   ];
 
@@ -190,19 +216,19 @@ export const getUserRoles = (user) => {
 
 export const isAdminUser = (user) => {
   const roles = getUserRoles(user);
-  return roles.some((role) => [ROLES.ADMIN, ROLES.MANAGER, ROLES.STAFF].includes(role));
+  return roles.some((role) => ADMIN_WORKSPACE_ROLES.includes(role));
 };
 
 export const isCustomerUser = (user) => getUserRoles(user).includes(ROLES.CUSTOMER);
 
 export const getDefaultRedirectPath = (user) => {
   if (isAdminUser(user)) {
-    return '/dashboard';
+    return DASHBOARD_HOME_PATH;
   }
 
   if (isCustomerUser(user)) {
-    return '/';
+    return CUSTOMER_HOME_PATH;
   }
 
-  return '/';
+  return CUSTOMER_HOME_PATH;
 };

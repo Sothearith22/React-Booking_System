@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { adminService } from '../../../services/api';
-import Button from '../../../components/ui/Button';
-import Modal from '../../../components/ui/Modal';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { roomService } from '../../services/Room.Service';
+import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import {
   Loader2,
   Plus,
@@ -12,16 +12,11 @@ import {
   Edit,
   Home,
   Download,
-  DoorOpen,
-  CheckCircle2,
-  CalendarCheck,
-  Wrench,
 } from 'lucide-react';
 
-// ── Helpers ────────────────────────────────────────────────────────
 
 const formatCurrency = (value) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value) || 0);
 
 
 const STATUS_CONFIG = {
@@ -62,6 +57,94 @@ const ROOM_TYPE_MAP = {
   'Modern City Penthouse': 'Suite',
 };
 
+const EMPTY_ROOM_FORM = {
+  name: '',
+  room_number: '',
+  room_type: '',
+  price_per_night: '',
+  floor: '',
+  status: 'available',
+  location: 'Main Wing',
+  description: '',
+};
+
+const getRoomList = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+
+  if (payload && typeof payload === 'object') {
+    return [payload];
+  }
+
+  return [];
+};
+
+const getAmenityLabel = (amenity) => {
+  if (!amenity) {
+    return '';
+  }
+
+  if (typeof amenity === 'string') {
+    return amenity;
+  }
+
+  return amenity.name || amenity.title || amenity.label || amenity.slug || amenity.code || '';
+};
+
+const normalizeRoomStatus = (room) => {
+  const rawStatus = String(room?.status || '').toLowerCase();
+
+  if (STATUS_CONFIG[rawStatus]) {
+    return rawStatus;
+  }
+
+  if (room?.is_active === false) {
+    return 'maintenance';
+  }
+
+  return 'available';
+};
+
+const normalizeRoom = (room) => {
+  const name =
+    room?.name ||
+    room?.room_type ||
+    room?.title ||
+    `Room ${room?.room_number ?? room?.id ?? ''}`.trim() ||
+    'Untitled room';
+
+  const image =
+    room?.image ||
+    room?.image_url ||
+    room?.room_images?.find((item) => item?.is_cover)?.image_url ||
+    room?.room_images?.[0]?.image_url ||
+    '';
+
+  const amenities = Array.isArray(room?.amenities)
+    ? room.amenities.map(getAmenityLabel).filter(Boolean)
+    : [];
+
+  return {
+    ...room,
+    id: room?.id ?? crypto.randomUUID(),
+    name,
+    room_number: room?.room_number || room?.number || '',
+    room_type: room?.room_type || room?.type || room?.category?.name || ROOM_TYPE_MAP[name] || 'Standard',
+    price_per_night: Number(room?.price_per_night ?? room?.price ?? 0),
+    floor: room?.floor || room?.level || '',
+    status: normalizeRoomStatus(room),
+    location: room?.location || room?.wing || 'Main Wing',
+    description: room?.description || '',
+    image,
+    amenities,
+  };
+};
+
 // ── Stat Card ────────────────────────────────────────────────────
 
 const StatCard = ({ label, value, subtitle, subtitleColor }) => (
@@ -85,39 +168,38 @@ const ROWS_PER_PAGE = 5;
 const RoomsPage = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editRoom, setEditRoom] = useState(null);
-  const [roomForm, setRoomForm] = useState({
-    room_number: '',
-    room_type: '',
-    price_per_night: '',
-    floor: '',
-    status: 'available',
-    location: 'Main Wing',
-  });
+  const [roomForm, setRoomForm] = useState(EMPTY_ROOM_FORM);
 
-  useEffect(() => {
-    fetchRooms();
-  }, []);
-
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     setLoading(true);
+    setError('');
+
     try {
-      const res = await adminService.getRooms();
-      setRooms(res.data);
-    } catch (error) {
-      console.error('Error fetching rooms:', error);
+      const response = await roomService.getRooms();
+      const nextRooms = getRoomList(response.data).map(normalizeRoom);
+      setRooms(nextRooms);
+    } catch (loadError) {
+      console.error('Error fetching rooms:', loadError);
+      setRooms([]);
+      setError(loadError?.response?.data?.message || 'Unable to load rooms right now.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchRooms();
+  }, [fetchRooms]);
 
   const resetForm = () => {
-    setRoomForm({ room_number: '', room_type: '', price_per_night: '', floor: '', status: 'available', location: 'Main Wing' });
+    setRoomForm(EMPTY_ROOM_FORM);
     setEditRoom(null);
   };
 
@@ -129,74 +211,116 @@ const RoomsPage = () => {
   const openEditModal = (room) => {
     setEditRoom(room);
     setRoomForm({
+      name: room.name || '',
       room_number: room.room_number || '',
       room_type: room.room_type || '',
       price_per_night: room.price_per_night || '',
       floor: room.floor || '',
       status: room.status || 'available',
       location: room.location || 'Main Wing',
+      description: room.description || '',
     });
     setIsModalOpen(true);
   };
 
   const handleSaveRoom = async () => {
-    if (!roomForm.room_type || !roomForm.price_per_night) return;
-
-    if (editRoom) {
-      await adminService.updateRoom(editRoom.id, {
-        ...roomForm,
-        price_per_night: Number(roomForm.price_per_night),
-        floor: Number(roomForm.floor),
-      });
-    } else {
-      await adminService.addRoom({
-        ...roomForm,
-        price_per_night: Number(roomForm.price_per_night),
-        floor: Number(roomForm.floor),
-        image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=800',
-      });
+    if (!roomForm.name.trim() || !roomForm.price_per_night) {
+      return;
     }
 
-    fetchRooms();
-    setIsModalOpen(false);
-    resetForm();
+    const payload = {
+      name: roomForm.name.trim(),
+      description: roomForm.description.trim(),
+      status: roomForm.status,
+      is_active: roomForm.status !== 'maintenance',
+      price_per_night: Number(roomForm.price_per_night),
+    };
+
+    if (roomForm.room_number.trim()) {
+      payload.room_number = roomForm.room_number.trim();
+    }
+
+    if (roomForm.room_type.trim()) {
+      payload.room_type = roomForm.room_type.trim();
+    }
+
+    if (roomForm.location.trim()) {
+      payload.location = roomForm.location.trim();
+    }
+
+    if (roomForm.floor !== '') {
+      payload.floor = Number(roomForm.floor);
+    }
+
+    try {
+      setError('');
+
+      if (editRoom) {
+        await roomService.updateRoom(editRoom.id, payload);
+      } else {
+        await roomService.addRoom(payload);
+      }
+
+      await fetchRooms();
+      setIsModalOpen(false);
+      resetForm();
+    } catch (saveError) {
+      console.error('Error saving room:', saveError);
+      setError(saveError?.response?.data?.message || 'Unable to save this room right now.');
+    }
   };
 
   const handleDeleteRoom = async (id) => {
-    if (window.confirm('Are you sure you want to delete this room?')) {
-      await adminService.deleteRoom(id);
-      fetchRooms();
+    if (!window.confirm('Are you sure you want to delete this room?')) {
+      return;
+    }
+
+    try {
+      setError('');
+      await roomService.deleteRoom(id);
+      await fetchRooms();
+    } catch (deleteError) {
+      console.error('Error deleting room:', deleteError);
+      setError(deleteError?.response?.data?.message || 'Unable to delete this room right now.');
     }
   };
+
+  const roomTypes = useMemo(
+    () => Array.from(new Set(rooms.map((room) => room.room_type).filter(Boolean))).sort(),
+    [rooms]
+  );
 
   // Stats
   const stats = useMemo(() => {
     const total = rooms.length;
-    const available = rooms.filter((r) => r.status === 'available').length;
-    const booked = rooms.filter((r) => r.status === 'booked' || r.status === 'occupied').length;
-    const maintenance = rooms.filter((r) => r.status === 'maintenance').length;
+    const available = rooms.filter((room) => room.status === 'available').length;
+    const booked = rooms.filter((room) => room.status === 'booked' || room.status === 'occupied').length;
+    const maintenance = rooms.filter((room) => room.status === 'maintenance').length;
     const pct = total > 0 ? Math.round((available / total) * 100) : 0;
+
     return { total, available, booked, maintenance, pct };
   }, [rooms]);
 
   // Filter + Search
   const filteredRooms = useMemo(() => {
-    let list = [...rooms];
-    if (searchTerm) {
-      const q = searchTerm.toLowerCase();
-      list = list.filter(
-        (r) =>
-          r.room_type.toLowerCase().includes(q) ||
-          (r.room_number && r.room_number.toString().includes(q))
-      );
-    }
-    if (filterStatus !== 'all') {
-      list = list.filter((r) => r.status === filterStatus);
-    }
-    if (filterType !== 'all') {
-      list = list.filter((r) => (ROOM_TYPE_MAP[r.room_type] || r.room_type) === filterType);
-    }
-    return list;
+    const query = searchTerm.trim().toLowerCase();
+
+    return rooms.filter((room) => {
+      const matchesSearch =
+        !query ||
+        [
+          room.name,
+          room.room_number,
+          room.room_type,
+          room.description,
+          room.location,
+        ].some((value) => String(value || '').toLowerCase().includes(query));
+
+      const matchesStatus = filterStatus === 'all' || room.status === filterStatus;
+      const matchesType = filterType === 'all' || room.room_type === filterType;
+
+      return matchesSearch && matchesStatus && matchesType;
+    });
   }, [rooms, searchTerm, filterStatus, filterType]);
 
   // Pagination
@@ -212,16 +336,29 @@ const RoomsPage = () => {
 
   // Export
   const handleExport = () => {
-    const header = 'Room Number,Type,Price Per Night,Status,Floor\n';
+    const header = 'Name,Room Number,Type,Price Per Night,Status,Floor,Amenities\n';
     const rows = filteredRooms
-      .map((r) => `${r.room_number},${ROOM_TYPE_MAP[r.room_type] || r.room_type},${r.price_per_night},${r.status},${r.floor || '1'}`)
+      .map((room) =>
+        [
+          room.name,
+          room.room_number,
+          room.room_type,
+          room.price_per_night,
+          room.status,
+          room.floor || '',
+          room.amenities.join(' | '),
+        ]
+          .map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`)
+          .join(',')
+      )
       .join('\n');
+
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'rooms_export.csv';
-    a.click();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'rooms_export.csv';
+    link.click();
     URL.revokeObjectURL(url);
   };
 
@@ -249,6 +386,12 @@ const RoomsPage = () => {
           <Plus size={18} /> Add New Room
         </Button>
       </div>
+
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          {error}
+        </div>
+      )}
 
       {/* ── Stats ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -278,9 +421,11 @@ const RoomsPage = () => {
             className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
           >
             <option value="all">All Types</option>
-            <option value="Standard">Standard</option>
-            <option value="Deluxe">Deluxe</option>
-            <option value="Suite">Suite</option>
+            {roomTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
           </select>
 
           <select
@@ -306,9 +451,13 @@ const RoomsPage = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Room Number</th>
+                {/* <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Room Number</th> */}
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Name</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Image</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Price</th>
                 <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Type</th>
-                <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Price Per Night</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Amenities</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Description</th>
                 <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
                 <th className="px-6 py-4 text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest">Actions</th>
               </tr>
@@ -316,7 +465,7 @@ const RoomsPage = () => {
             <tbody className="divide-y divide-gray-50">
               {pagedRooms.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-20 text-center">
+                  <td colSpan={8} className="py-20 text-center">
                     <Home size={48} className="mx-auto text-gray-200 mb-4" />
                     <h3 className="text-base font-bold text-gray-900">No rooms found</h3>
                     <p className="text-sm text-gray-500 mt-1">Try adjusting your filters.</p>
@@ -325,31 +474,52 @@ const RoomsPage = () => {
               ) : (
                 pagedRooms.map((room) => {
                   const sc = STATUS_CONFIG[room.status] || STATUS_CONFIG.available;
-                  const typeLabel = ROOM_TYPE_MAP[room.room_type] || room.room_type;
 
                   return (
                     <tr key={room.id} className="group hover:bg-blue-50/30 transition-colors">
-                      {/* Room Number + Image */}
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-gray-900 text-base">{room.room_number || room.id}</span>
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden border border-gray-200 shadow-sm shrink-0">
-                            <img src={room.image} alt={room.room_type} className="w-full h-full object-cover" />
-                          </div>
+                      <td className="px-6 py-4">
+                        <div className="min-w-[180px]">
+                          <p className="font-bold text-gray-900 text-sm">{room.name}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {room.room_number ? `Room ${room.room_number}` : room.location}
+                          </p>
                         </div>
                       </td>
 
-                      {/* Type */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="font-medium text-gray-800">{typeLabel}</span>
+                        <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center">
+                          {room.image ? (
+                            <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Home size={18} className="text-gray-400" />
+                          )}
+                        </div>
                       </td>
 
-                      {/* Price */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="font-bold text-gray-900">{formatCurrency(room.price_per_night)}</span>
                       </td>
 
-                      {/* Status */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="font-medium text-gray-800">{room.room_type}</span>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {room.amenities.length > 0 ? (
+                          <p className="max-w-[220px] text-xs leading-5 text-gray-600">
+                            {room.amenities.join(', ')}
+                          </p>
+                        ) : (
+                          <span className="text-xs font-medium text-gray-400">No amenities</span>
+                        )}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <p className="max-w-[280px] text-sm leading-5 text-gray-600">
+                          {room.description || 'No description provided.'}
+                        </p>
+                      </td>
+
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${sc.bg} ${sc.text} ${sc.border}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
@@ -430,6 +600,15 @@ const RoomsPage = () => {
       {/* ── Add / Edit Room Modal ───────────────────────────── */}
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); resetForm(); }} title={editRoom ? 'Edit Room' : 'Add New Room'}>
         <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-gray-600 mb-1">Room Name</label>
+            <input
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              placeholder="e.g. Grand Royal Suite"
+              value={roomForm.name}
+              onChange={(e) => setRoomForm({ ...roomForm, name: e.target.value })}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-gray-600 mb-1">Room Number</label>
@@ -452,12 +631,22 @@ const RoomsPage = () => {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1">Room Type / Name</label>
+            <label className="block text-xs font-bold text-gray-600 mb-1">Room Type</label>
             <input
               className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              placeholder="e.g. Deluxe Suite"
+              placeholder="e.g. Suite"
               value={roomForm.room_type}
               onChange={(e) => setRoomForm({ ...roomForm, room_type: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-600 mb-1">Description</label>
+            <textarea
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              rows={3}
+              placeholder="Add a short room description"
+              value={roomForm.description}
+              onChange={(e) => setRoomForm({ ...roomForm, description: e.target.value })}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">

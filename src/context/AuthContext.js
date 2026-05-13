@@ -2,7 +2,7 @@ import { createContext, createElement, useCallback, useContext, useEffect, useSt
 import Cookies from 'js-cookie';
 import { authService } from '../services/api';
 import { COOKIE_OPTIONS } from '../utils/constants';
-import { getDefaultRedirectPath } from '../utils/auth';
+import { extractAuthToken, extractAuthUser, getDefaultRedirectPath, normalizeAuthUser } from '../utils/auth';
 
 const AuthContext = createContext();
 const TOKEN_COOKIE = 'token';
@@ -13,7 +13,18 @@ const isUserLike = (value) => {
     return false;
   }
 
-  return ['id', 'name', 'email', 'role', 'roles'].some((key) => key in value);
+  return [
+    'id',
+    'name',
+    'email',
+    'role',
+    'roles',
+    'user_type',
+    'role_name',
+    'roleName',
+    'role_id',
+    'roleId',
+  ].some((key) => key in value);
 };
 
 const getAuthPayload = (data) => {
@@ -26,16 +37,11 @@ const getAuthPayload = (data) => {
     data,
   ];
 
+  const fallbackUser = userCandidates.find(isUserLike);
+
   return {
-    token:
-      data?.token ||
-      data?.access_token ||
-      data?.accessToken ||
-      data?.data?.token ||
-      data?.data?.access_token ||
-      data?.data?.accessToken ||
-      null,
-    user: userCandidates.find(isUserLike) || null,
+    token: extractAuthToken(data),
+    user: extractAuthUser(data) || (fallbackUser ? normalizeAuthUser(fallbackUser) : null),
   };
 };
 
@@ -77,7 +83,7 @@ const getStoredUser = () => {
     }
 
     const parsedValue = JSON.parse(rawValue);
-    return isUserLike(parsedValue) ? parsedValue : null;
+    return isUserLike(parsedValue) ? normalizeAuthUser(parsedValue) : null;
   } catch {
     return null;
   }
@@ -90,7 +96,7 @@ const storeUser = (user) => {
       return;
     }
 
-    window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(normalizeAuthUser(user)));
   } catch {
     // Ignore storage write failures and keep auth working in memory.
   }
@@ -101,16 +107,18 @@ const mergeUserData = (storedUser, freshUser) => {
     return null;
   }
 
+  const normalizedFreshUser = normalizeAuthUser(freshUser);
+
   if (!storedUser) {
-    return freshUser;
+    return normalizedFreshUser;
   }
 
-  const hasFreshRole = Object.prototype.hasOwnProperty.call(freshUser, 'role');
-  const hasFreshRoles = Object.prototype.hasOwnProperty.call(freshUser, 'roles');
+  const hasFreshRole = Object.prototype.hasOwnProperty.call(normalizedFreshUser, 'role');
+  const hasFreshRoles = Object.prototype.hasOwnProperty.call(normalizedFreshUser, 'roles');
 
   return {
     ...storedUser,
-    ...freshUser,
+    ...normalizedFreshUser,
     ...(hasFreshRole ? {} : { role: storedUser.role }),
     ...(hasFreshRoles ? {} : { roles: storedUser.roles }),
   };

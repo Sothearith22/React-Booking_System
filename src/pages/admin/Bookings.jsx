@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { adminService } from '../../../services/api';
-import Button from '../../../components/ui/Button';
-import Modal from '../../../components/ui/Modal';
+import { adminService } from '../../services/api';
+import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import {
   Loader2,
   Search,

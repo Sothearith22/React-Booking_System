@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import Button from '../../../components/ui/Button';
-import Modal from '../../../components/ui/Modal';
+import React, { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import {
   Search,
   Plus,
@@ -12,7 +12,6 @@ import {
   Package,
   AlertTriangle,
   Truck,
-  Filter,
   Loader2,
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -74,6 +73,7 @@ const InventoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newItem, setNewItem] = useState({ name: '', category: 'Toiletries', stock: '', reorder: '' });
+  const deferredSearchTerm = useDeferredValue(searchTerm);
 
   useEffect(() => {
     const timer = setTimeout(() => { setItems(MOCK_INVENTORY); setLoading(false); }, 400);
@@ -83,25 +83,27 @@ const InventoryPage = () => {
   // Stats
   const stats = useMemo(() => {
     const total = items.length;
-    const lowStock = items.filter(i => i.status === 'low_stock' || i.status === 'out_of_stock').length;
-    return { total, lowStock };
+    const lowStock = items.filter(i => i.status === 'low_stock').length;
+    const outOfStock = items.filter(i => i.status === 'out_of_stock').length;
+    return { total, lowStock, outOfStock, actionItems: lowStock + outOfStock };
   }, [items]);
 
   // Filter
   const filteredItems = useMemo(() => {
     let list = [...items];
-    if (searchTerm) {
-      const q = searchTerm.toLowerCase();
+    if (deferredSearchTerm) {
+      const q = deferredSearchTerm.trim().toLowerCase();
       list = list.filter(i => i.name.toLowerCase().includes(q) || i.category.toLowerCase().includes(q));
     }
     if (categoryFilter !== 'All Categories') list = list.filter(i => i.category === categoryFilter);
     if (statusFilter !== 'all') list = list.filter(i => i.status === statusFilter);
     return list;
-  }, [items, searchTerm, categoryFilter, statusFilter]);
+  }, [items, deferredSearchTerm, categoryFilter, statusFilter]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / ROWS_PER_PAGE));
-  const pagedItems = filteredItems.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
+  const activePage = Math.min(currentPage, totalPages);
+  const pagedItems = filteredItems.slice((activePage - 1) * ROWS_PER_PAGE, activePage * ROWS_PER_PAGE);
 
   const handleAddItem = (e) => {
     e.preventDefault();
@@ -138,57 +140,100 @@ const InventoryPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
-            <span>Admin</span><ChevronRight size={12} /><span className="text-gray-900">Inventory</span>
+      <section className="rounded-[2rem] border border-zinc-100 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-sky-600">Inventory Controls</p>
+            <h2 className="mt-2 text-xl font-black tracking-tight text-zinc-950">Keep stock organized and easy to act on</h2>
+            <p className="mt-1 text-sm font-medium text-zinc-500">
+              Search items, narrow the view, export reports, or add new stock from one place.
+            </p>
           </div>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Inventory Management</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Monitor and restock hotel supplies across all departments.</p>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+              {stats.total.toLocaleString()} tracked
+            </span>
+            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+              {stats.lowStock} low stock
+            </span>
+            <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-700">
+              {stats.outOfStock} out of stock
+            </span>
+          </div>
         </div>
-        <Button className="flex items-center gap-2 shadow-lg shadow-blue-500/20" onClick={() => setIsAddModalOpen(true)}>
-          <Plus size={18} /> Add New Item
-        </Button>
-      </div>
+
+        <div className="mt-5 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="relative w-full xl:max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search inventory items..."
+              className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end xl:w-auto">
+            <select
+              value={categoryFilter}
+              onChange={(e) => {
+                setCategoryFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            >
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option value="all">Stock Status</option>
+              <option value="in_stock">In Stock</option>
+              <option value="low_stock">Low Stock</option>
+              <option value="out_of_stock">Out of Stock</option>
+            </select>
+            <Button variant="outline" className="flex items-center gap-2" onClick={handleExport}>
+              <Download size={16} /> Export
+            </Button>
+            <Button className="flex items-center gap-2 shadow-lg shadow-blue-500/20" onClick={() => setIsAddModalOpen(true)}>
+              <Plus size={18} /> Add New Item
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard icon={Package} iconBg="bg-blue-50 text-blue-600" label="Total Items" value={stats.total.toLocaleString()} subtitle="+4 this week" subtitleColor="text-emerald-600" />
-        <StatCard icon={AlertTriangle} iconBg="bg-amber-50 text-amber-600" label="Low Stock Alerts" value={stats.lowStock} subtitle="Requires Action" subtitleColor="text-red-600" />
+        <StatCard icon={AlertTriangle} iconBg="bg-amber-50 text-amber-600" label="Low Stock Alerts" value={stats.actionItems} subtitle={stats.outOfStock ? `${stats.outOfStock} critical` : 'Inventory healthy'} subtitleColor={stats.outOfStock ? 'text-red-600' : 'text-emerald-600'} />
         <StatCard icon={Truck} iconBg="bg-indigo-50 text-indigo-600" label="Recent Orders" value="45" subtitle="8 Pending" subtitleColor="text-blue-600" />
-      </div>
-
-      {/* Filter Bar */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        <div className="relative w-full lg:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <input type="text" placeholder="Search inventory items…"
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} />
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <select value={categoryFilter} onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-            <option value="all">Stock Status</option>
-            <option value="in_stock">In Stock</option>
-            <option value="low_stock">Low Stock</option>
-            <option value="out_of_stock">Out of Stock</option>
-          </select>
-          <Button variant="outline" size="sm" className="flex items-center gap-1.5" onClick={handleExport}>
-            <Download size={14} /> Export
-          </Button>
-        </div>
       </div>
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="flex flex-col gap-2 border-b border-gray-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Stock Directory</h2>
+            <p className="text-sm text-gray-500">
+              {filteredItems.length} item{filteredItems.length === 1 ? '' : 's'} match your current view.
+            </p>
+          </div>
+          <span className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-bold text-zinc-600">
+            Page {activePage} of {totalPages}
+          </span>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="min-w-[760px] w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
                 <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Item Name</th>
@@ -262,14 +307,14 @@ const InventoryPage = () => {
         {filteredItems.length > ROWS_PER_PAGE && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
             <p className="text-xs text-gray-500">
-              Showing <span className="font-bold text-gray-900">{(currentPage - 1) * ROWS_PER_PAGE + 1}-{Math.min(currentPage * ROWS_PER_PAGE, filteredItems.length)}</span> of <span className="font-bold text-gray-900">{filteredItems.length}</span> items
+              Showing <span className="font-bold text-gray-900">{(activePage - 1) * ROWS_PER_PAGE + 1}-{Math.min(activePage * ROWS_PER_PAGE, filteredItems.length)}</span> of <span className="font-bold text-gray-900">{filteredItems.length}</span> items
             </p>
             <div className="flex items-center gap-1">
-              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"><ChevronLeft size={16} /></button>
+              <button onClick={() => setCurrentPage((page) => Math.max(1, Math.min(page, totalPages) - 1))} disabled={activePage === 1} className="p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"><ChevronLeft size={16} /></button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button key={page} onClick={() => setCurrentPage(page)} className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === currentPage ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-gray-600 hover:bg-gray-100'}`}>{page}</button>
+                <button key={page} onClick={() => setCurrentPage(page)} className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === activePage ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-gray-600 hover:bg-gray-100'}`}>{page}</button>
               ))}
-              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"><ChevronRight size={16} /></button>
+              <button onClick={() => setCurrentPage((page) => Math.min(totalPages, Math.min(page, totalPages) + 1))} disabled={activePage === totalPages} className="p-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"><ChevronRight size={16} /></button>
             </div>
           </div>
         )}

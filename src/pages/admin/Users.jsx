@@ -10,11 +10,11 @@ import {
   Users,
 } from 'lucide-react';
 
-import Alert from '../../../components/ui/Alert';
-import Button from '../../../components/ui/Button';
-import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
-import Modal from '../../../components/ui/Modal';
-import { useUsers } from '../hooks/useUsers';
+import Alert from '../../components/ui/Alert';
+import Button from '../../components/ui/Button';
+import DeleteConfirmationModal from '../../components/ui/DeleteConfirmationModal';
+import Modal from '../../components/ui/Modal';
+import { useUsers } from '../../hooks/useUsers';
 
 const ROWS_PER_PAGE = 5;
 const DEFAULT_NEW_USER = {

@@ -1,14 +1,18 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { isAdminUser } from '../../utils/auth';
+import {
+  CUSTOMER_PROFILE_PATH,
+  DASHBOARD_HOME_PATH,
+  isAdminUser,
+} from '../../utils/auth';
 
 export const HomePage = () => {
   const { isAuthenticated, user } = useAuth();
 
   const primaryAction = isAuthenticated
     ? isAdminUser(user)
-      ? { label: 'Open dashboard', to: '/dashboard' }
-      : { label: 'View profile', to: '/profile' }
+      ? { label: 'Open dashboard', to: DASHBOARD_HOME_PATH }
+      : { label: 'View profile', to: CUSTOMER_PROFILE_PATH }
     : { label: 'Sign in', to: '/login' };
 
   return (

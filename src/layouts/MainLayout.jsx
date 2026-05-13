@@ -1,10 +1,20 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { isAdminUser } from '../utils/auth';
+import {
+  CUSTOMER_HOME_PATH,
+  CUSTOMER_PROFILE_PATH,
+  DASHBOARD_HOME_PATH,
+  isAdminUser,
+} from '../utils/auth';
 
 export const MainLayout = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const navigationItems = [
+    { label: 'Home', to: CUSTOMER_HOME_PATH, end: true },
+    ...(isAuthenticated ? [{ label: 'Profile', to: CUSTOMER_PROFILE_PATH }] : []),
+  ];
+
   const linkClassName = ({ isActive }) =>
     `rounded-full px-4 py-2 text-sm font-medium transition ${
       isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-200'
@@ -24,18 +34,11 @@ export const MainLayout = () => {
           </NavLink>
 
           <nav className="flex items-center gap-2">
-            <NavLink to="/" end className={linkClassName}>
-              Home
-            </NavLink>
-            <NavLink to="/explore" className={linkClassName}>
-              Explore
-            </NavLink>
-            <NavLink to="/about" className={linkClassName}>
-              About
-            </NavLink>
-            <NavLink to="/contact" className={linkClassName}>
-              Contact
-            </NavLink>
+            {navigationItems.map((item) => (
+              <NavLink key={item.to} to={item.to} end={item.end} className={linkClassName}>
+                {item.label}
+              </NavLink>
+            ))}
           </nav>
 
           <div className="flex items-center gap-3 btn">
@@ -45,7 +48,7 @@ export const MainLayout = () => {
                   {user?.name || user?.email}
                 </span>
                 {isAdminUser(user) ? (
-                  <NavLink to="/dashboard" className={linkClassName}>
+                  <NavLink to={DASHBOARD_HOME_PATH} className={linkClassName}>
                     Dashboard
                   </NavLink>
                 ) : null}

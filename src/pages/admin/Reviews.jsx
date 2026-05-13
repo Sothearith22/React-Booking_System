@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import Button from '../../../components/ui/Button';
-import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
+import Button from '../../components/ui/Button';
+import DeleteConfirmationModal from '../../components/ui/DeleteConfirmationModal';
 import {
   Search,
   Star,

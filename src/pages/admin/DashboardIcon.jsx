@@ -1,6 +1,8 @@
 export default function DashboardIcon({ name, className = 'h-5 w-5' }) {
   const sharedProps = {
     className,
+    width: '24',
+    height: '24',
     viewBox: '0 0 24 24',
     fill: 'none',
     xmlns: 'http://www.w3.org/2000/svg',
@@ -8,6 +10,8 @@ export default function DashboardIcon({ name, className = 'h-5 w-5' }) {
     strokeWidth: '1.8',
     strokeLinecap: 'round',
     strokeLinejoin: 'round',
+    'aria-hidden': 'true',
+    focusable: 'false',
   };
 
   switch (name) {

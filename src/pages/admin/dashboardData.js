@@ -1,209 +1,152 @@
 export const navItems = [
   {
-    id: 'overview',
-    to: '/dashboard',
-    end: true,
+    id: 'dashboard',
     label: 'Dashboard',
     icon: 'dashboard',
-    headerTitle: 'Dashboard',
-    headerSubtitle: 'A clean operational snapshot for the day-to-day admin workflow.',
+    to: '/admin/dashboard',
+    headerTitle: 'Dashboard Overview',
+    headerSubtitle: 'Track your hotel performance and operations.',
+    end: true
+  },
+  {
+    id: 'categories',
+    label: 'Categories',
+    icon: 'services',
+    to: '/admin/categories',
+    headerTitle: 'Room Categories',
+    headerSubtitle: 'Manage your hotel room types and pricing.'
+  },
+  {
+    id: 'rooms',
+    label: 'Rooms',
+    icon: 'bookings',
+    to: '/admin/rooms',
+    headerTitle: 'Room Management',
+    headerSubtitle: 'Monitor and update individual room status.'
   },
   {
     id: 'bookings',
-    to: '/dashboard/bookings',
     label: 'Bookings',
-    icon: 'bookings',
-    headerTitle: 'Booking operations',
-    headerSubtitle: 'Keep arrivals, room readiness, and reservation follow-ups in one view.',
+    icon: 'calendar',
+    to: '/admin/bookings',
+    headerTitle: 'Reservations',
+    headerSubtitle: 'Review and manage all guest bookings.'
   },
   {
-    id: 'services',
-    to: '/dashboard/services',
-    label: 'Services',
-    icon: 'services',
-    headerTitle: 'Service coordination',
-    headerSubtitle: 'Track add-ons, concierge requests, and service handoffs.',
-  },
-  {
-    id: 'guests',
-    to: '/dashboard/guests',
-    label: 'Guests',
+    id: 'users',
+    label: 'Users',
     icon: 'guests',
-    headerTitle: 'Guest experience queue',
-    headerSubtitle: 'Spot profile gaps, VIP notes, and recent guest issues quickly.',
+    to: '/admin/users',
+    headerTitle: 'User Accounts',
+    headerSubtitle: 'Manage staff and customer access.'
   },
   {
-    id: 'finance',
-    to: '/dashboard/finance',
-    label: 'Finance',
+    id: 'reviews',
+    label: 'Reviews',
+    icon: 'sparkle',
+    to: '/admin/reviews',
+    headerTitle: 'Guest Reviews',
+    headerSubtitle: 'Monitor guest feedback and ratings.'
+  },
+  {
+    id: 'inventory',
+    label: 'Inventory',
     icon: 'finance',
-    headerTitle: 'Revenue and billing',
-    headerSubtitle: 'Watch revenue pacing, refunds, and outstanding billing tasks.',
+    to: '/admin/inventory',
+    headerTitle: 'Inventory Tracking',
+    headerSubtitle: 'Manage your hotel supplies and stock.'
   },
   {
-    id: 'staff',
-    to: '/dashboard/staff',
-    label: 'Staff',
+    id: 'availability',
+    label: 'Availability',
     icon: 'staff',
-    headerTitle: 'Staff planning',
-    headerSubtitle: 'Review shift coverage, task balance, and training progress.',
-  },
-  {
-    id: 'reports',
-    to: '/dashboard/reports',
-    label: 'Reports',
-    icon: 'reports',
-    headerTitle: 'Reporting snapshot',
-    headerSubtitle: 'Surface the trends that matter across operations and guest experience.',
+    to: '/admin/availability',
+    headerTitle: 'Service Availability',
+    headerSubtitle: 'Track service uptime and scheduling.'
   },
   {
     id: 'settings',
-    to: '/dashboard/settings',
     label: 'Settings',
     icon: 'settings',
-    headerTitle: 'Platform settings',
-    headerSubtitle: 'Manage the operating rules and preferences behind the booking flow.',
-  },
+    to: '/admin/settings',
+    headerTitle: 'System Settings',
+    headerSubtitle: 'Configure platform-wide preferences.'
+  }
 ];
 
 export const stats = [
-  {
-    title: 'Total Booking',
-    value: '1,200',
-    trend: '+2.98%',
-    icon: 'bookings',
-    iconTone: 'bg-sky-100 text-sky-600',
-    trendTone: 'text-emerald-600 bg-emerald-50',
-  },
-  {
-    title: 'Total New Customers',
-    value: '2,845',
-    trend: '-1.45%',
-    icon: 'guests',
-    iconTone: 'bg-emerald-100 text-emerald-600',
-    trendTone: 'text-rose-600 bg-rose-50',
-  },
-  {
-    title: 'Total Earnings',
-    value: '$12,890',
-    trend: '+3.75%',
-    icon: 'finance',
-    iconTone: 'bg-amber-100 text-amber-700',
-    trendTone: 'text-emerald-600 bg-emerald-50',
-  },
-  {
-    title: 'Upcoming Check-ins',
-    value: '86',
-    trend: '+0.84%',
-    icon: 'calendar',
-    iconTone: 'bg-violet-100 text-violet-600',
-    trendTone: 'text-sky-600 bg-sky-50',
-  },
+  { title: 'Total Revenue', value: '28,430', trend: '+12.5%', icon: 'finance', iconTone: 'bg-emerald-100 text-emerald-600', trendTone: 'bg-emerald-50 text-emerald-600' },
+  { title: 'Total Bookings', value: '1,240', trend: '+8.2%', icon: 'bookings', iconTone: 'bg-sky-100 text-sky-600', trendTone: 'bg-sky-50 text-sky-600' },
+  { title: 'Active Guests', value: '432', trend: '+4.1%', icon: 'guests', iconTone: 'bg-amber-100 text-amber-600', trendTone: 'bg-amber-50 text-amber-600' },
+  { title: 'Staff on Duty', value: '48', trend: '0%', icon: 'staff', iconTone: 'bg-indigo-100 text-indigo-600', trendTone: 'bg-zinc-100 text-zinc-600' },
 ];
 
 export const revenuePoints = [
-  { label: 'Sun', value: 360 },
-  { label: 'Mon', value: 420 },
-  { label: 'Tue', value: 295 },
-  { label: 'Wed', value: 635, highlight: true },
-  { label: 'Thu', value: 410 },
-  { label: 'Fri', value: 560 },
-  { label: 'Sat', value: 505 },
+  { label: 'Mon', value: 4500 },
+  { label: 'Tue', value: 5200 },
+  { label: 'Wed', value: 4800 },
+  { label: 'Thu', value: 6100 },
+  { label: 'Fri', value: 7500, highlight: true },
+  { label: 'Sat', value: 8200 },
+  { label: 'Sun', value: 7800 },
 ];
 
 export const destinationBreakdown = [
-  { name: 'Tokyo, Japan', percent: 35, participants: '2,458 participants', tone: 'bg-sky-500' },
-  { name: 'Sydney, Australia', percent: 28, participants: '2,148 participants', tone: 'bg-blue-300' },
-  { name: 'Paris, France', percent: 22, participants: '2,458 participants', tone: 'bg-cyan-200' },
-  { name: 'Venice, Italy', percent: 15, participants: '2,456 participants', tone: 'bg-slate-200' },
+  { name: 'France', percent: 35, participants: '420 guests', tone: 'bg-sky-500', strokeColor: '#0ea5e9' },
+  { name: 'Maldives', percent: 25, participants: '300 guests', tone: 'bg-emerald-500', strokeColor: '#10b981' },
+  { name: 'Japan', percent: 20, participants: '240 guests', tone: 'bg-amber-500', strokeColor: '#f59e0b' },
+  { name: 'Other', percent: 20, participants: '240 guests', tone: 'bg-zinc-400', strokeColor: '#a1a1aa' },
 ];
 
 export const tripSummary = [
-  { label: 'Done', value: 620, tone: 'bg-sky-500' },
-  { label: 'Booked', value: 465, tone: 'bg-emerald-500' },
-  { label: 'Cancelled', value: 115, tone: 'bg-rose-400' },
+  { label: 'Confirmed', value: 840, tone: 'bg-emerald-500' },
+  { label: 'Pending', value: 240, tone: 'bg-amber-500' },
+  { label: 'Cancelled', value: 120, tone: 'bg-rose-500' },
 ];
 
 export const packages = [
   {
-    name: 'Cultural Exploration',
-    location: 'Tokyo, Japan',
-    category: 'Featured getaway',
-    image:
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200&auto=format&fit=crop',
-    detail: '4.8 · 12 destinations',
+    name: 'Skyline Suites',
+    location: 'Paris, France',
+    category: 'Luxury',
+    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800',
+    detail: 'Riverside view, breakfast included'
   },
   {
-    name: 'Venice Dreams',
-    location: 'Venice, Italy',
-    category: 'Romance package',
-    image:
-      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop',
-    detail: '4.9 · 8 destinations',
+    name: 'Ocean Villa',
+    location: 'Maldives',
+    category: 'Resort',
+    image: 'https://images.unsplash.com/photo-1544124499-58912cbddaad?auto=format&fit=crop&q=80&w=800',
+    detail: 'Private pool, beach access'
   },
   {
-    name: 'Safari Adventure',
-    location: 'Marrakech, Morocco',
-    category: 'Adventure tour',
-    image:
-      'https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?q=80&w=1200&auto=format&fit=crop',
-    detail: '4.7 · 10 destinations',
-  },
+    name: 'Alpine Lodge',
+    location: 'Swiss Alps',
+    category: 'Cabin',
+    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800',
+    detail: 'Mountain view, spa access'
+  }
 ];
 
 export const messageThreads = [
-  {
-    name: 'Europa Hotel',
-    preview: 'We are pleased to confirm your transfer pickup.',
-    time: '10:00 AM',
-    accent: 'bg-sky-100 text-sky-700',
-  },
-  {
-    name: 'Global Travel Co',
-    preview: 'We have updated our corporate rates for August.',
-    time: '2:20 PM',
-    accent: 'bg-rose-100 text-rose-700',
-  },
-  {
-    name: 'Kalendra Umbra',
-    preview: 'Hi, I need assistance with my booking extension.',
-    time: '9:45 AM',
-    accent: 'bg-amber-100 text-amber-700',
-  },
-  {
-    name: 'Osmar Farooq',
-    preview: 'Hello, I had an amazing trip and want to book again.',
-    time: '10:15 AM',
-    accent: 'bg-emerald-100 text-emerald-700',
-  },
-  {
-    name: 'Melinda Jenkins',
-    preview: 'Can you send me more information about the suite views?',
-    time: '7:20 PM',
-    accent: 'bg-violet-100 text-violet-700',
-  },
+  { name: 'John Doe', preview: 'Is late check-in possible for tonight?', time: '2m ago', accent: 'bg-sky-100 text-sky-600' },
+  { name: 'Jane Smith', preview: 'Thank you for the wonderful stay!', time: '1h ago', accent: 'bg-emerald-100 text-emerald-600' },
+  { name: 'Robert Fox', preview: 'Can I upgrade my room to a suite?', time: '3h ago', accent: 'bg-amber-100 text-amber-600' },
 ];
 
 export const upcomingTrips = [
   {
-    title: 'Paris, France',
-    category: 'Romantic getaway',
-    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1200&auto=format&fit=crop',
-    rating: '4.8',
-    dates: '8-10 July',
-  },
-  {
-    title: 'Tokyo, Japan',
-    category: 'Cultural exploration',
-    image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1200&auto=format&fit=crop',
+    title: 'Paris Summer Getaway',
+    category: 'Leisure',
     rating: '4.9',
-    dates: '17-20 July',
+    dates: '12-18 Jul, 2026',
+    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=800'
   },
   {
-    title: 'Sydney, Australia',
-    category: 'Adventure tour',
-    image: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?q=80&w=1200&auto=format&fit=crop',
-    rating: '4.7',
-    dates: '23-24 July',
-  },
+    title: 'Maldives Honeymoon',
+    category: 'Romantic',
+    rating: '5.0',
+    dates: '20-27 Jul, 2026',
+    image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&q=80&w=800'
+  }
 ];
