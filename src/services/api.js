@@ -1,5 +1,10 @@
 import api from './axios';
 
+const withUnwrappedData = (response) => ({
+  ...response,
+  data: response.data?.data ?? response.data ?? [],
+});
+
 export const authService = {
   register: (data) => api.post('/register', data),
   login: (credentials) => api.post('/login', credentials),
@@ -15,21 +20,8 @@ export const adminService = {
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
 
-  // getRooms: () =>
-  //   api.get('/v1/rooms').then((response) => ({
-  //     ...response,
-  //     data: response.data?.data ?? response.data ?? [],
-  //   })),
-  // addRoom: (data) => api.post('/v1/rooms', data),
-  // updateRoom: (id, data) => api.put(`/v1/rooms/${id}`, data),
-  // deleteRoom: (id) => api.delete(`/v1/rooms/${id}`),
-
-  // getBookings: () =>
-  //   api.get('/v1/bookings').then((response) => ({
-  //     ...response,
-  //     data: response.data?.data ?? response.data ?? [],
-  //   })),
-  // updateBookingStatus: (id, status) => api.put(`/v1/bookings/${id}`, { status }),
+  getBookings: () => api.get('/v1/bookings').then(withUnwrappedData),
+  updateBookingStatus: (id, status) => api.put(`/v1/bookings/${id}`, { status }),
 
   // getCategories: () => api.get('/admin/categories'),
   // createCategory: (data) => api.post('/admin/categories', data),
