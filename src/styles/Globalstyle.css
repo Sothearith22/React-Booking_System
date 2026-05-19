@@ -1,0 +1,378 @@
+/* --- Global / Colors Configuration --- */
+:root {
+  --primary-color: #2b2b5c;   /* Dark Navy Blue */
+  --accent-color: #ff4f5a;    /* Vibrant Coral Red */
+  --text-muted: #888888;      /* Soft Gray */
+  --bg-light: #f9f9fb;        /* Light section background */
+  --font-family: 'Poppins', sans-serif;
+}
+
+body {
+  font-family: var(--font-family);
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+}
+
+/* ==========================================================================
+   1. HERO SLIDER SECTION (Slidebar)
+   ========================================================================== */
+
+.hero-container {
+  position: relative;
+  width: 100%;
+  height: 620px;
+  background-color: #e5e7eb;
+}
+
+/* Background slides */
+.hero-bg-slide {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+/* Dark/Light readable blend overlay */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Main Content Wrapper */
+.hero-content-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* Let Swiper drag underneath */
+}
+
+.hero-inner {
+  width: 100%;
+  max-w: 1024px;
+  padding: 0 20px;
+  text-align: center;
+  pointer-events: auto; /* Re-enable pointer for forms/buttons */
+}
+
+/* Typography */
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+}
+
+.hero-title span {
+  color: #ffffff;
+  text-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+}
+
+.hero-description {
+  color: #4b5563;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 650px;
+  margin: 0 auto 3rem auto;
+}
+
+/* Tabs System */
+.search-tabs-container {
+  max-width: 896px;
+  margin: 0 auto;
+}
+
+.tabs-row {
+  display: flex;
+  gap: 8px;
+  margin-left: 16px;
+}
+
+.tab-btn {
+  border: none;
+  padding: 10px 32px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tab-btn.active {
+  background-color: var(--accent-color);
+  color: #ffffff;
+}
+
+.tab-btn.inactive {
+  background-color: #ffffff;
+  color: #374151;
+}
+
+.tab-btn.inactive:hover {
+  background-color: #f3f4f6;
+}
+
+/* Search Bar (Glassmorphic panel) */
+.search-bar-panel {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .search-bar-panel {
+    flex-wrap: nowrap;
+  }
+}
+
+/* Input Form Fields */
+.search-bar-panel input,
+.search-bar-panel select {
+  flex: 1;
+  min-width: 130px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 0.875rem;
+  color: #1f2937;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.search-bar-panel input::placeholder,
+.search-bar-panel select {
+  color: #9ca3af;
+}
+
+.advanced-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 0 8px;
+}
+
+.advanced-btn:hover {
+  color: #111827;
+}
+
+.search-submit-btn {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(255, 79, 90, 0.2);
+  transition: background-color 0.2s ease;
+}
+
+.search-submit-btn:hover {
+  background-color: #e64650;
+}
+
+/* Custom Dots Pagination Positioning */
+.custom-hero-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 40px;
+}
+
+.custom-hero-pagination .swiper-pagination-bullet {
+  background-color: #9ca3af !important;
+  opacity: 1 !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.custom-hero-pagination .swiper-pagination-bullet-active {
+  background-color: var(--primary-color) !important;
+}
+
+
+/* ==========================================================================
+   2. FEATURED PROPERTIES SECTION
+   ========================================================================== */
+
+.properties-section {
+  padding: 80px 0;
+  background-color: var(--bg-light);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.section-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 12px;
+}
+
+.section-subtitle {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* Slider Frame & Container sizing */
+.carousel-outer-wrapper {
+  max-width: 1152px;
+  margin: 0 auto;
+  padding: 0 48px;
+  position: relative;
+}
+
+/* Custom Navigation Circles Buttons */
+.prop-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.2rem;
+}
+
+.prop-prev-btn {
+  left: 0;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+}
+
+.prop-prev-btn:hover {
+  background-color: #1e1e42;
+}
+
+.prop-next-btn {
+  right: 0;
+  background-color: #ffffff;
+  color: #6b7280;
+  border: 1px solid #f3f4f6;
+}
+
+.prop-next-btn:hover {
+  color: var(--primary-color);
+}
+
+.prop-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Cards Design Elements */
+.property-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s ease;
+  margin-bottom: 16px; /* spacing for card elevation */
+}
+
+.property-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-image-box {
+  height: 208px;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  background-color: #e5e7eb;
+}
+
+/* Counter Badge */
+.property-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #374151;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  letter-spacing: 0.05em;
+}
+
+.card-body {
+  padding: 24px;
+}
+
+.card-location {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.card-title {
+  color: var(--primary-color);
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.card-title:hover {
+  color: var(--accent-color);
+}
+
+.view-property-link {
+  color: var(--accent-color);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  display: inline-block;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.view-property-link:hover {
+  border-color: var(--accent-color);
+}

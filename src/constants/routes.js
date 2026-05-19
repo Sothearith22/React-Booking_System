@@ -1,0 +1,17 @@
+export const ROUTES = {
+  ROOT: '/',
+  LOGIN: '/login',
+  REGISTER: '/register',
+  ADMIN: '/admin',
+  ADMIN_DASHBOARD: '/admin/dashboard',
+  ADMIN_USERS: '/admin/users',
+  ADMIN_BOOKINGS: '/admin/bookings',
+  ADMIN_ROOMS: '/admin/rooms',
+  ADMIN_CATEGORIES: '/admin/categories',
+  ADMIN_REVIEWS: '/admin/reviews',
+  ADMIN_INVENTORY: '/admin/inventory',
+  ADMIN_AVAILABILITY: '/admin/availability',
+  CUSTOMER: '/customer',
+  CUSTOMER_PROFILE: '/customer/profile',
+  CUSTOMER_ROOM: '/customer/room',
+};

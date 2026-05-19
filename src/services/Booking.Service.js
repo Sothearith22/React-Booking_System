@@ -1,7 +1,1 @@
-import React from 'react'
-
-export const bookingService = () => {
-  return (
-    <div>bookingService</div>
-  )
-}
+export { bookingService } from '../features/bookings/services/booking.service';
