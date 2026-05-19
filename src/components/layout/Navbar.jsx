@@ -45,7 +45,7 @@ const NAV_LINKS = [
   { name: "Home", to: "/" },
   { name: "About", to: "/about" },
   { name: "Room", to: "/product" },
-  { name: "Services", to: "/Service" },
+  { name: "Services", to: "/service" },
   { name: "My Booking", to: "/booking" },
   { name: "Contact", to: "/contact" },
 ];
@@ -77,7 +77,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
             >
               <WhatsAppIcon />
-              <span>+91 78785 33701</span>
+              <span>+96 9839 871</span>
             </a>
           </div>
 
