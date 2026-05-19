@@ -13,7 +13,7 @@ const useRooms = () => {
 
     try {
       const res = await roomService.getRooms();
-      const data = getRoomList(res.data).map(normalizeRoom);
+      const data = getRoomList(res).map(normalizeRoom);
       setRooms(data);
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to load rooms');

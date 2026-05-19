@@ -1,3 +1,5 @@
+export const ROWS_PER_PAGE = 5;
+
 export const STATUS_CONFIG = {
   available: {
     label: 'Available',
@@ -14,7 +16,7 @@ export const STATUS_CONFIG = {
     border: 'border-blue-200',
   },
   occupied: {
-    label: 'Occupied',
+    label: 'Booked',
     dot: 'bg-blue-500',
     bg: 'bg-blue-50',
     text: 'text-blue-700',
@@ -36,15 +38,20 @@ export const ROOM_TYPE_MAP = {
   'Modern City Penthouse': 'Suite',
 };
 
-export const EMPTY_ROOM_FORM = {
-  name: '',
-  room_number: '',
-  room_type: '',
-  price_per_night: '',
-  floor: '',
-  status: 'available',
-  location: 'Main Wing',
-  description: '',
-};
+export const ROOM_STATUS_OPTIONS = [
+  { value: 'available', label: 'Available' },
+  { value: 'booked', label: 'Booked' },
+  { value: 'maintenance', label: 'Maintenance' },
+];
 
-export const ROWS_PER_PAGE = 5;
+export const EMPTY_ROOM_FORM = {
+  service_id: '',
+  name: '',
+  capacity: '1',
+  amenities: '',
+  sort_order: '1',
+  price_per_night: '',
+  status: 'available',
+  description: '',
+  images: [],
+};

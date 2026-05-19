@@ -3,6 +3,14 @@ import { roomService } from '../../services/Room.Service';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import {
+  EMPTY_ROOM_FORM,
+  ROOM_STATUS_OPTIONS,
+  ROWS_PER_PAGE,
+  STATUS_CONFIG,
+} from '../../constants/roomConstants';
+import { formatCurrency } from '../../utils/format';
+import { buildRoomPayload, getRoomList, mapRoomToForm, normalizeRoom } from '../../utils/roomUtils';
+import {
   Loader2,
   Plus,
   Search,
@@ -14,134 +22,31 @@ import {
   Download,
 } from 'lucide-react';
 
+const ROOM_INPUT_CLASS =
+  'w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 transition-all placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500';
 
-const formatCurrency = (value) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value) || 0);
+const ROOM_TEXTAREA_CLASS = `${ROOM_INPUT_CLASS} min-h-[104px] resize-none`;
 
-
-const STATUS_CONFIG = {
-  available: {
-    label: 'Available',
-    dot: 'bg-emerald-500',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-700',
-    border: 'border-emerald-200',
-  },
-  booked: {
-    label: 'Booked',
-    dot: 'bg-blue-500',
-    bg: 'bg-blue-50',
-    text: 'text-blue-700',
-    border: 'border-blue-200',
-  },
-  occupied: {
-    label: 'Booked',
-    dot: 'bg-blue-500',
-    bg: 'bg-blue-50',
-    text: 'text-blue-700',
-    border: 'border-blue-200',
-  },
-  maintenance: {
-    label: 'Maintenance',
-    dot: 'bg-amber-500',
-    bg: 'bg-amber-50',
-    text: 'text-amber-700',
-    border: 'border-amber-200',
-  },
-};
-
-const ROOM_TYPE_MAP = {
-  'Grand Royal Suite': 'Suite',
-  'Ocean View Villa': 'Deluxe',
-  'Alpine Mountain Lodge': 'Standard',
-  'Modern City Penthouse': 'Suite',
-};
-
-const EMPTY_ROOM_FORM = {
-  name: '',
-  room_number: '',
-  room_type: '',
-  price_per_night: '',
-  floor: '',
-  status: 'available',
-  location: 'Main Wing',
-  description: '',
-};
-
-const getRoomList = (payload) => {
-  if (Array.isArray(payload)) {
-    return payload;
-  }
-
-  if (Array.isArray(payload?.data)) {
-    return payload.data;
-  }
-
-  if (payload && typeof payload === 'object') {
-    return [payload];
-  }
-
+const getServiceList = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.services)) return payload.services;
+  if (Array.isArray(payload?.data?.services)) return payload.data.services;
   return [];
 };
 
-const getAmenityLabel = (amenity) => {
-  if (!amenity) {
-    return '';
-  }
-
-  if (typeof amenity === 'string') {
-    return amenity;
-  }
-
-  return amenity.name || amenity.title || amenity.label || amenity.slug || amenity.code || '';
-};
-
-const normalizeRoomStatus = (room) => {
-  const rawStatus = String(room?.status || '').toLowerCase();
-
-  if (STATUS_CONFIG[rawStatus]) {
-    return rawStatus;
-  }
-
-  if (room?.is_active === false) {
-    return 'maintenance';
-  }
-
-  return 'available';
-};
-
-const normalizeRoom = (room) => {
-  const name =
-    room?.name ||
-    room?.room_type ||
-    room?.title ||
-    `Room ${room?.room_number ?? room?.id ?? ''}`.trim() ||
-    'Untitled room';
-
-  const image =
-    room?.image ||
-    room?.image_url ||
-    room?.room_images?.find((item) => item?.is_cover)?.image_url ||
-    room?.room_images?.[0]?.image_url ||
-    '';
-
-  const amenities = Array.isArray(room?.amenities)
-    ? room.amenities.map(getAmenityLabel).filter(Boolean)
-    : [];
+const normalizeServiceOption = (service) => {
+  const id = service?.id;
+  const label =
+    service?.name ||
+    service?.title ||
+    service?.service_name ||
+    service?.label ||
+    (id ? `Service #${id}` : 'Unnamed Service');
 
   return {
-    ...room,
-    id: room?.id ?? crypto.randomUUID(),
-    name,
-    room_number: room?.room_number || room?.number || '',
-    room_type: room?.room_type || room?.type || room?.category?.name || ROOM_TYPE_MAP[name] || 'Standard',
-    price_per_night: Number(room?.price_per_night ?? room?.price ?? 0),
-    floor: room?.floor || room?.level || '',
-    status: normalizeRoomStatus(room),
-    location: room?.location || room?.wing || 'Main Wing',
-    description: room?.description || '',
-    image,
-    amenities,
+    value: id ? String(id) : '',
+    label,
   };
 };
 
@@ -163,8 +68,6 @@ const StatCard = ({ label, value, subtitle, subtitleColor }) => (
 
 // ── Main Page ────────────────────────────────────────────────────
 
-const ROWS_PER_PAGE = 5;
-
 const RoomsPage = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -175,7 +78,12 @@ const RoomsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editRoom, setEditRoom] = useState(null);
-  const [roomForm, setRoomForm] = useState(EMPTY_ROOM_FORM);
+  const [roomForm, setRoomForm] = useState(() => ({ ...EMPTY_ROOM_FORM }));
+  const [formError, setFormError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [serviceOptions, setServiceOptions] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(false);
+  const [servicesError, setServicesError] = useState('');
 
   const fetchRooms = useCallback(async () => {
     setLoading(true);
@@ -183,7 +91,7 @@ const RoomsPage = () => {
 
     try {
       const response = await roomService.getRooms();
-      const nextRooms = getRoomList(response.data).map(normalizeRoom);
+      const nextRooms = getRoomList(response).map(normalizeRoom);
       setRooms(nextRooms);
     } catch (loadError) {
       console.error('Error fetching rooms:', loadError);
@@ -194,13 +102,35 @@ const RoomsPage = () => {
     }
   }, []);
 
+  const fetchServices = useCallback(async () => {
+    setServicesLoading(true);
+    setServicesError('');
+
+    try {
+      const response = await roomService.getServices();
+      const options = getServiceList(response)
+        .map(normalizeServiceOption)
+        .filter((service) => service.value && service.label)
+        .sort((left, right) => left.label.localeCompare(right.label));
+      setServiceOptions(options);
+    } catch (loadError) {
+      console.error('Error fetching services:', loadError);
+      setServiceOptions([]);
+      setServicesError(loadError?.response?.data?.message || 'Unable to load services right now.');
+    } finally {
+      setServicesLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchRooms();
-  }, [fetchRooms]);
+    fetchServices();
+  }, [fetchRooms, fetchServices]);
 
   const resetForm = () => {
-    setRoomForm(EMPTY_ROOM_FORM);
+    setRoomForm({ ...EMPTY_ROOM_FORM });
     setEditRoom(null);
+    setFormError('');
   };
 
   const openAddModal = () => {
@@ -210,63 +140,102 @@ const RoomsPage = () => {
 
   const openEditModal = (room) => {
     setEditRoom(room);
-    setRoomForm({
-      name: room.name || '',
-      room_number: room.room_number || '',
-      room_type: room.room_type || '',
-      price_per_night: room.price_per_night || '',
-      floor: room.floor || '',
-      status: room.status || 'available',
-      location: room.location || 'Main Wing',
-      description: room.description || '',
-    });
+    setRoomForm(mapRoomToForm(room));
+    setFormError('');
     setIsModalOpen(true);
   };
 
-  const handleSaveRoom = async () => {
-    if (!roomForm.name.trim() || !roomForm.price_per_night) {
+  const closeModal = () => {
+    setIsModalOpen(false);
+    resetForm();
+  };
+
+  const updateRoomForm = (field, value) => {
+    setRoomForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+
+    if (formError) {
+      setFormError('');
+    }
+  };
+
+  const updateRoomImages = (files) => {
+    setRoomForm((current) => ({
+      ...current,
+      images: Array.from(files || []),
+    }));
+
+    if (formError) {
+      setFormError('');
+    }
+  };
+
+  const handleSaveRoom = async (event) => {
+    event.preventDefault();
+
+    if (!roomForm.service_id || Number(roomForm.service_id) <= 0) {
+      setFormError('Select a service or enter a valid service ID.');
       return;
     }
 
-    const payload = {
-      name: roomForm.name.trim(),
-      description: roomForm.description.trim(),
-      status: roomForm.status,
-      is_active: roomForm.status !== 'maintenance',
-      price_per_night: Number(roomForm.price_per_night),
-    };
-
-    if (roomForm.room_number.trim()) {
-      payload.room_number = roomForm.room_number.trim();
+    if (!roomForm.name.trim()) {
+      setFormError('Room name is required.');
+      return;
     }
 
-    if (roomForm.room_type.trim()) {
-      payload.room_type = roomForm.room_type.trim();
+    if (!roomForm.price_per_night || Number(roomForm.price_per_night) <= 0) {
+      setFormError('Enter a valid nightly price greater than 0.');
+      return;
     }
 
-    if (roomForm.location.trim()) {
-      payload.location = roomForm.location.trim();
+    if (!roomForm.capacity || Number(roomForm.capacity) < 1) {
+      setFormError('Capacity must be at least 1 guest.');
+      return;
     }
 
-    if (roomForm.floor !== '') {
-      payload.floor = Number(roomForm.floor);
+    if (!roomForm.sort_order || Number(roomForm.sort_order) < 1) {
+      setFormError('Sort order must be at least 1.');
+      return;
     }
+
+    const payload = buildRoomPayload(roomForm);
+    const imageFiles = Array.isArray(roomForm.images)
+      ? roomForm.images.filter((file) => file instanceof File)
+      : [];
 
     try {
       setError('');
+      setFormError('');
+      setIsSaving(true);
+      let savedRoom;
 
       if (editRoom) {
-        await roomService.updateRoom(editRoom.id, payload);
+        savedRoom = await roomService.updateRoom(editRoom.id, payload);
       } else {
-        await roomService.addRoom(payload);
+        savedRoom = await roomService.addRoom(payload);
+      }
+
+      const roomId = editRoom?.id ?? savedRoom?.id;
+
+      if (imageFiles.length > 0) {
+        if (!roomId) {
+          throw new Error('Room saved but image upload could not determine the room ID.');
+        }
+
+        await roomService.uploadRoomImages(roomId, imageFiles);
       }
 
       await fetchRooms();
-      setIsModalOpen(false);
-      resetForm();
+      closeModal();
     } catch (saveError) {
       console.error('Error saving room:', saveError);
-      setError(saveError?.response?.data?.message || 'Unable to save this room right now.');
+      const message = saveError?.response?.data?.message || 'Unable to save this room right now.';
+      setError(message);
+      setFormError(message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -329,6 +298,10 @@ const RoomsPage = () => {
     (currentPage - 1) * ROWS_PER_PAGE,
     currentPage * ROWS_PER_PAGE
   );
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -434,9 +407,11 @@ const RoomsPage = () => {
             className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
           >
             <option value="all">All Statuses</option>
-            <option value="available">Available</option>
-            <option value="booked">Booked</option>
-            <option value="maintenance">Maintenance</option>
+            {ROOM_STATUS_OPTIONS.map((status) => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
           </select>
 
           <Button variant="outline" size="sm" className="flex items-center gap-1.5" onClick={handleExport}>
@@ -598,90 +573,176 @@ const RoomsPage = () => {
       </div>
 
       {/* ── Add / Edit Room Modal ───────────────────────────── */}
-      <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); resetForm(); }} title={editRoom ? 'Edit Room' : 'Add New Room'}>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1">Room Name</label>
-            <input
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              placeholder="e.g. Grand Royal Suite"
-              value={roomForm.name}
-              onChange={(e) => setRoomForm({ ...roomForm, name: e.target.value })}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Room Number</label>
-              <input
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                placeholder="e.g. 101"
-                value={roomForm.room_number}
-                onChange={(e) => setRoomForm({ ...roomForm, room_number: e.target.value })}
-              />
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editRoom ? 'Edit Room' : 'Add New Room'}
+        panelClassName="max-w-2xl"
+      >
+        <form onSubmit={handleSaveRoom} className="space-y-4">
+          {formError && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              {formError}
             </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Floor</label>
-              <input
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                type="number"
-                placeholder="e.g. 1"
-                value={roomForm.floor}
-                onChange={(e) => setRoomForm({ ...roomForm, floor: e.target.value })}
-              />
+              <label className="mb-1 block text-xs font-bold text-gray-600">Service</label>
+              {serviceOptions.length > 0 ? (
+                <select
+                  className={ROOM_INPUT_CLASS}
+                  value={roomForm.service_id}
+                  onChange={(event) => updateRoomForm('service_id', event.target.value)}
+                >
+                  <option value="">Select a service</option>
+                  {serviceOptions.map((service) => (
+                    <option key={service.value} value={service.value}>
+                      {service.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  className={ROOM_INPUT_CLASS}
+                  type="number"
+                  min="1"
+                  placeholder="e.g. 4"
+                  value={roomForm.service_id}
+                  onChange={(event) => updateRoomForm('service_id', event.target.value)}
+                />
+              )}
+              <p className="mt-1 text-xs text-gray-400">
+                {servicesLoading
+                  ? 'Loading services...'
+                  : servicesError || 'Choose the linked service/category for this room.'}
+              </p>
             </div>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1">Room Type</label>
-            <input
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              placeholder="e.g. Suite"
-              value={roomForm.room_type}
-              onChange={(e) => setRoomForm({ ...roomForm, room_type: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1">Description</label>
-            <textarea
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              rows={3}
-              placeholder="Add a short room description"
-              value={roomForm.description}
-              onChange={(e) => setRoomForm({ ...roomForm, description: e.target.value })}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Price / Night ($)</label>
-              <input
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                type="number"
-                placeholder="e.g. 200"
-                value={roomForm.price_per_night}
-                onChange={(e) => setRoomForm({ ...roomForm, price_per_night: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Status</label>
+              <label className="mb-1 block text-xs font-bold text-gray-600">Status</label>
               <select
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className={ROOM_INPUT_CLASS}
                 value={roomForm.status}
-                onChange={(e) => setRoomForm({ ...roomForm, status: e.target.value })}
+                onChange={(event) => updateRoomForm('status', event.target.value)}
               >
-                <option value="available">Available</option>
-                <option value="booked">Booked</option>
-                <option value="maintenance">Maintenance</option>
+                {ROOM_STATUS_OPTIONS.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
               </select>
             </div>
+
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-bold text-gray-600">Room Name</label>
+              <input
+                className={ROOM_INPUT_CLASS}
+                placeholder="e.g. Standard Single Room"
+                value={roomForm.name}
+                onChange={(event) => updateRoomForm('name', event.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-bold text-gray-600">Price / Night ($)</label>
+              <input
+                className={ROOM_INPUT_CLASS}
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="e.g. 45.00"
+                value={roomForm.price_per_night}
+                onChange={(event) => updateRoomForm('price_per_night', event.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-bold text-gray-600">Capacity</label>
+              <input
+                className={ROOM_INPUT_CLASS}
+                type="number"
+                min="1"
+                placeholder="e.g. 1"
+                value={roomForm.capacity}
+                onChange={(event) => updateRoomForm('capacity', event.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-bold text-gray-600">Sort Order</label>
+              <input
+                className={ROOM_INPUT_CLASS}
+                type="number"
+                min="1"
+                placeholder="e.g. 1"
+                value={roomForm.sort_order}
+                onChange={(event) => updateRoomForm('sort_order', event.target.value)}
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-bold text-gray-600">Amenities</label>
+              <textarea
+                className={ROOM_TEXTAREA_CLASS}
+                rows={3}
+                placeholder="Wi-Fi, Air Conditioning"
+                value={roomForm.amenities}
+                onChange={(event) => updateRoomForm('amenities', event.target.value)}
+              />
+              <p className="mt-1 text-xs text-gray-400">Separate amenities with commas.</p>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-bold text-gray-600">Room Images</label>
+              <input
+                className={`${ROOM_INPUT_CLASS} file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700`}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(event) => updateRoomImages(event.target.files)}
+              />
+              {roomForm.images.length > 0 ? (
+                <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
+                  {roomForm.images.length} image{roomForm.images.length > 1 ? 's' : ''} selected:
+                  {' '}
+                  {roomForm.images.map((file) => file.name).join(', ')}
+                </div>
+              ) : editRoom?.image ? (
+                <div className="mt-2 flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+                  <img src={editRoom.image} alt={editRoom.name} className="h-12 w-12 rounded-lg object-cover" />
+                  <p className="text-xs text-gray-500">
+                    Current image will stay unchanged unless you upload a new one.
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-1 text-xs text-gray-400">
+                  Images are uploaded right after the room details are saved.
+                </p>
+              )}
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs font-bold text-gray-600">Description</label>
+              <textarea
+                className={ROOM_TEXTAREA_CLASS}
+                rows={4}
+                placeholder="Add a short room description"
+                value={roomForm.description}
+                onChange={(event) => updateRoomForm('description', event.target.value)}
+              />
+            </div>
           </div>
+
           <div className="flex gap-2 pt-2">
-            <Button onClick={handleSaveRoom} className="flex-1 shadow-lg shadow-blue-500/20">
-              {editRoom ? 'Update Room' : 'Save Room'}
+            <Button type="submit" className="flex-1 shadow-lg shadow-blue-500/20" disabled={isSaving}>
+              {isSaving ? 'Saving...' : editRoom ? 'Update Room' : 'Save Room'}
             </Button>
-            <Button variant="ghost" onClick={() => { setIsModalOpen(false); resetForm(); }} className="flex-1">
+            <Button variant="ghost" onClick={closeModal} className="flex-1" disabled={isSaving}>
               Cancel
             </Button>
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   );

@@ -1,6 +1,4 @@
-/**
- * Utility functions for formatting data
- */
+
 
 /**
  * Formats a number as USD currency

@@ -16,8 +16,8 @@ export const ProfilePage = () => {
         <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
           {user?.name || 'Guest account'}
         </h1>
-        <p className="mt-2 text-slate-600">
-          {user?.email || 'No email is available for this account yet.'}
+        <p className="mt-2 text-slate-6ilabl00">
+          {user?.email || 'No email is avae for this account yet.'}
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
