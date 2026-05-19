@@ -1,7 +1,3 @@
-import React from 'react'
+export const categoryService = {};
 
-export const categoryService = () => {
-  return (
-    <div>categoryService.</div>
-  )
-}
+export default categoryService;

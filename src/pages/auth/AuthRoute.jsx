@@ -1,7 +1,8 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { ROUTES } from '../../constants/routes';
+import { useAuth } from '../../features/auth';
 import { AuthLayout } from '../../layouts/AuthLayout';
-import { getDefaultRedirectPath } from '../../utils/auth';
+import { getDefaultRedirectPath } from '../../features/auth/utils/auth.utils';
 
 export function AuthRoute({ initialMode = 'login' }) {
   const { isAuthenticated, loading, user } = useAuth();

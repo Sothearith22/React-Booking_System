@@ -1,6 +1,6 @@
-import { useAuth } from '../hooks/useAuth';
-import Login from '../pages/auth/LoginPage';
-import Register from '../pages/auth/RegisterPage';
+import { useAuth } from '../features/auth';
+import Login from '../features/auth/LoginPage';
+import Register from '../features/auth/RegisterPage';
 
 export function AuthLayout({ initialMode = 'login' }) {
   const { isAuthenticated, loading, user, logout } = useAuth();

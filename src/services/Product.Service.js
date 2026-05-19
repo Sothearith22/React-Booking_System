@@ -1,9 +1,3 @@
-import React from 'react'
+export const productService = {};
 
-export const productService = () => {
-  return (
-    <div>productService</div>
-  )
-}
-
-  
+export default productService;
