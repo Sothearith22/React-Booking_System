@@ -5,7 +5,6 @@ export default function DashboardHeader({ title, subtitle }) {
   const { user } = useAuth();
   const userInitials = user?.name?.slice(0, 2).toUpperCase() || 'AD';
   const userRole = typeof user?.role === 'string' ? user.role : 'Staff';
-
   return (
     <header className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
       <div className="animate-in fade-in slide-in-from-left-4 duration-700">

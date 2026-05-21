@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ChevronRight,
   DollarSign,
+  Loader2,
   Plus,
 } from 'lucide-react';
 
@@ -177,14 +178,15 @@ export default function BookingsPage() {
     URL.revokeObjectURL(url);
   };
 
+
   if (loading) {
     return (
-      <div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-500">
-        Loading bookings...
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
+        <p className="text-gray-500 font-medium">Loading Booking</p>
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="rounded-2xl border border-rose-100 bg-rose-50 p-6">

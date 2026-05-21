@@ -79,7 +79,7 @@ const getKnownRoleName = (value) => {
 
   const normalizedValue = value.trim().toLowerCase();
 
-  return ['admin', 'manager', 'receptionist', 'staff', 'customer'].includes(normalizedValue)
+  return ['admin', 'manager', 'receptionist',  'customer'].includes(normalizedValue)
     ? normalizedValue
     : null;
 };

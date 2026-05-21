@@ -110,7 +110,7 @@ export const bookingService = {
 
   async updateBookingStatus(id, status) {
     try {
-      const response = await apiClient.put(API_ENDPOINTS.bookings.detail(id), { status });
+      const response = await apiClient.get(API_ENDPOINTS.bookings.detail(id), { status });
       return unwrapResponse(response);
     } catch (error) {
       if (error?.response?.status !== 405) {

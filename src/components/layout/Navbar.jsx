@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ROUTES } from "../../constants/routes";
+import { useAuth } from "../../features/auth";
 
 const WhatsAppIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
@@ -25,34 +27,106 @@ const XIcon = () => (
   </svg>
 );
 
+const ChevronDownIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+  </svg>
+);
+
 const Logo = () => (
   <div className="flex items-center gap-2">
     <div className="w-8 h-8 rounded-full bg-red-50 border border-red-500 flex items-center justify-center shrink-0">
       <span className="text-red-600 font-bold text-sm" style={{ fontFamily: "Georgia, serif" }}>
-        O
+        L
       </span>
     </div>
     <span
       className="text-lg font-bold text-gray-900 tracking-tight"
       style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
     >
-      Owen Property
+      LUMIÈRE
     </span>
   </div>
 );
 
 const NAV_LINKS = [
-  { name: "Home", to: "/" },
-  { name: "About", to: "/about" },
-  { name: "Room", to: "/product" },
-  { name: "Services", to: "/service" },
-  { name: "My Booking", to: "/booking" },
-  { name: "Contact", to: "/contact" },
+  { name: "Home", to: ROUTES.CUSTOMER },
+  { name: "About", to: ROUTES.CUSTOMER_ABOUT },
+  { name: "Room", to: ROUTES.CUSTOMER_ROOM },
+  { name: "Services", to: ROUTES.CUSTOMER_SERVICE },
+  { name: "My Booking", to: ROUTES.CUSTOMER },
+  // { name: "Contact", to: "/contact" },
 ];
+
+const getInitials = (name = "") => {
+  const initials = name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("");
+
+  return initials.toUpperCase() || "GU";
+};
+
+const getRoleName = (user) => {
+  if (typeof user?.role === "string") return user.role;
+  if (user?.role?.name) return user.role.name;
+  if (Array.isArray(user?.roles) && user.roles.length > 0) {
+    const firstRole = user.roles[0];
+    return typeof firstRole === "string" ? firstRole : firstRole?.name || firstRole?.slug;
+  }
+
+  return "Customer";
+};
 
 export default function Navbar() {
   const [active, setActive] = useState("Home");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const displayName = user?.name || "Guest User";
+  const displayEmail = user?.email || "Sign in to view your account";
+  const displayRole = getRoleName(user);
+  const userInitials = getInitials(displayName);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setProfileOpen(false);
+    setMenuOpen(false);
+    navigate(ROUTES.LOGIN, { replace: true });
+  };
 
   return (
     <>
@@ -61,7 +135,7 @@ export default function Navbar() {
         rel="stylesheet"
       />
 
-      <div className="w-full">
+      <div className="sticky top-0 z-50 w-full">
         {/* Top Bar */}
         <div className="bg-gray-900 text-gray-400 text-xs px-6 md:px-10 py-1.5 flex flex-wrap items-center justify-between gap-2">
           {/* Left */}
@@ -89,7 +163,7 @@ export default function Navbar() {
         </div>
 
         {/* Main Navbar */}
-        <nav className="bg-white shadow-sm px-6 md:px-10 flex items-center justify-between h-16 relative z-50">
+        <nav className="bg-white shadow-sm px-6 md:px-10 flex items-center justify-between h-16 relative">
           {/* Logo */}
           <Logo />
 
@@ -115,11 +189,80 @@ export default function Navbar() {
 
           {/* Right Side */}
           <div className="flex items-center gap-3">
-            {/* Submit Property Button - Desktop */}
-            <button className="hidden md:flex items-center gap-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white text-sm font-semibold px-4 py-2.5 rounded-md transition-all duration-200 whitespace-nowrap">
-              <span className="text-base leading-none font-bold">+</span>
-              Submit Property
-            </button>
+            {/* Profile Menu - Desktop */}
+            <div className="relative hidden md:block" ref={profileRef}>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen((open) => !open)}
+                  className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-2.5 py-2 text-sm font-semibold text-gray-800 transition-all duration-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                  aria-expanded={profileOpen}
+                  aria-haspopup="menu"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
+                    {userInitials}
+                  </span>
+                  <span className="max-w-28 truncate">{displayName}</span>
+                  <ChevronDownIcon />
+                </button>
+              ) : (
+                <Link
+                  to={ROUTES.LOGIN}
+                  className="flex items-center gap-2 rounded-md bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-red-700"
+                >
+                  <UserIcon />
+                  Login
+                </Link>
+              )}
+
+              {profileOpen && isAuthenticated && (
+                <div
+                  className="absolute right-0 top-full mt-3 w-72 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-xl"
+                  role="menu"
+                >
+                  <div className="border-b border-gray-100 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white">
+                        {userInitials}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-gray-900">{displayName}</p>
+                        <p className="truncate text-xs text-gray-500">{displayEmail}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                      <div className="rounded-md bg-gray-50 p-3">
+                        <p className="text-gray-500">Role</p>
+                        <p className="mt-1 truncate font-semibold capitalize text-gray-900">{displayRole}</p>
+                      </div>
+                      <div className="rounded-md bg-gray-50 p-3">
+                        <p className="text-gray-500">Status</p>
+                        <p className="mt-1 font-semibold text-green-600">Active</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-2">
+                    <Link
+                      to={ROUTES.CUSTOMER_PROFILE}
+                      onClick={() => setProfileOpen(false)}
+                      className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-red-50 hover:text-red-600"
+                      role="menuitem"
+                    >
+                      View Profile
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-red-50 hover:text-red-600"
+                      role="menuitem"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Mobile Menu Toggle */}
             <button
@@ -154,10 +297,45 @@ export default function Navbar() {
               </Link>
             ))}
 
-            <button className="mt-6 w-full flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-3 rounded-md transition-colors">
-              <span className="text-base leading-none font-bold">+</span>
-              Submit Property
-            </button>
+            {isAuthenticated ? (
+              <div className="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white">
+                    {userInitials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-gray-900">{displayName}</p>
+                    <p className="truncate text-xs text-gray-500">{displayEmail}</p>
+                    <p className="mt-1 text-xs font-semibold capitalize text-red-600">{displayRole}</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <Link
+                    to={ROUTES.CUSTOMER_PROFILE}
+                    onClick={() => setMenuOpen(false)}
+                    className="rounded-md bg-white px-3 py-2 text-center text-sm font-semibold text-gray-700 transition-colors hover:text-red-600"
+                  >
+                    View Profile
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Link
+                to={ROUTES.LOGIN}
+                onClick={() => setMenuOpen(false)}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+              >
+                <UserIcon />
+                Login
+              </Link>
+            )}
           </div>
         )}
       </div>

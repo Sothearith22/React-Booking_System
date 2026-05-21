@@ -64,7 +64,6 @@ const normalizeUser = (user) => {
     email: user?.email || 'No email',
     role,
     status,
-    department: user?.department || 'Operations',
     last_login: formatLastLogin(user?.last_login ?? user?.lastLogin ?? user?.updated_at),
     initials: getInitials(user?.name, user?.email),
   };

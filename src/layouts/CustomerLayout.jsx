@@ -8,6 +8,7 @@ import { ROUTES } from '../constants/routes';
 //   isAdminUser,
 // } from '../features/auth/utils/auth.utils';
 import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 import { Outlet } from 'react-router-dom';
 
 export const CustomerLayout = () => {
@@ -34,6 +35,7 @@ export const CustomerLayout = () => {
       <main className="w-full">
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 };

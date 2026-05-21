@@ -98,6 +98,7 @@ const AppRoutes = () => {
           />
 
           <Route path="dashboard" element={<DashboardPage />} />
+          {/* <Route path="" element={}/> */}
           <Route path="users" element={<UsersPage />} />
           <Route path="bookings" element={<BookingsPage />} />
           <Route path="rooms" element={<RoomsPage />} />
@@ -114,7 +115,6 @@ const AppRoutes = () => {
       {/* Customer Routes */}
       <Route path={ROUTES.CUSTOMER} element={<CustomerLayout />}>
         <Route index element={<HomePage />} />
-
         <Route element={<ProtectedRoute />}>
           <Route path="profile" element={<ProfilePage />} />
           <Route path="room" element={<RoomPage />} />
