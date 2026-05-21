@@ -2,15 +2,18 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import { useAuth } from '../../auth';
 import DashboardIcon from './DashboardIcon';
+import { Loader2 } from 'lucide-react';
 
 export default function DashboardSidebar({ navItems = [] }) {
   const { user, logout } = useAuth();
+
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     navigate(ROUTES.LOGIN, { replace: true });
   };
+
 
   return (
     <aside className="w-full xl:h-full xl:w-[280px] xl:shrink-0">
@@ -81,7 +84,7 @@ export default function DashboardSidebar({ navItems = [] }) {
                 <line x1="21" y1="12" x2="9" y2="12" />
               </svg>
             </div>
-            <span>Logout</span>
+            <span onClick={handleLogout}>Logout</span>
           </button>
         </div>
       </div>

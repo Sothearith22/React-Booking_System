@@ -9,6 +9,7 @@ export const AdminLayout = () => {
   const currentPage =
     navItems.find((item) => item.to === location.pathname) || navItems[0];
 
+
   return (
     <div className="min-h-screen bg-[#f8faff] font-sans selection:bg-sky-100 selection:text-sky-900 xl:h-screen xl:overflow-hidden">
       <div className="flex min-h-screen w-full flex-col gap-6 px-4 py-4 sm:px-6 xl:h-full xl:flex-row xl:items-stretch xl:gap-8 xl:px-6 xl:py-6">

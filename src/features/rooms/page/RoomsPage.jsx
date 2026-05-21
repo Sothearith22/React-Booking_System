@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BedDouble, BadgeCheck, CalendarClock, Wrench, Plus } from 'lucide-react';
+import { BedDouble, BadgeCheck, CalendarClock, Wrench, Plus, Loader2 } from 'lucide-react';
 
 import RoomFilters from '../components/RoomFilters';
 import RoomModal from '../components/RoomModal';
@@ -17,15 +17,9 @@ import { usePagination } from '../../../hooks/usePagination';
 
 import { roomService } from '../services/room.service';
 import { EMPTY_ROOM_FORM, ROWS_PER_PAGE, STATUS_CONFIG } from '../constants/room.constants';
-import { buildRoomPayload, mapRoomToForm } from '../utils/room.utils';
+import { buildRoomPayload, mapRoomToForm ,getServiceList } from '../utils/room.utils';
 
-const getServiceList = (payload) => {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (payload?.data && typeof payload.data === 'object') return [payload.data];
-  if (payload && typeof payload === 'object') return [payload];
-  return [];
-};
+
 
 const getSavedRoomId = (response, fallbackId) =>
   response?.id || response?.room?.id || response?.data?.id || fallbackId;
@@ -211,8 +205,13 @@ export default function RoomsPage() {
     }
   };
 
-  if (loading) {
-    return <div className="p-10 text-center">Loading...</div>;
+    if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
+        <p className="text-gray-500 font-medium">Loading Booking</p>
+      </div>
+    );
   }
 
   return (

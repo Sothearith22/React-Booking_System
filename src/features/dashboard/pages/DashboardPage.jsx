@@ -3,7 +3,7 @@ import DashboardIcon from '../components/DashboardIcon';
 import {
   destinationBreakdown,
   messageThreads,
-  packages,
+  // packages,
   revenuePoints,
   stats,
   tripSummary,
@@ -295,7 +295,7 @@ export default function DashboardPage() {
           </DashboardCard>
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_340px]">
-            <DashboardCard
+            {/* <DashboardCard
               title="Travel Packages"
               action={
                 <div className="flex items-center gap-2">
@@ -330,7 +330,7 @@ export default function DashboardPage() {
                   </article>
                 ))}
               </div>
-            </DashboardCard>
+            </DashboardCard> */}
 
             <DashboardCard title="Messages">
               <div className="space-y-3">
