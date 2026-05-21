@@ -32,6 +32,7 @@ import ServiceAvailabilityPage from '../features/services/ServiceAvailabilityPag
 import { HomePage } from '../features/customers/pages/HomePage';
 import { ProfilePage } from '../features/customers/pages/ProfilePage';
 import { RoomPage } from '../features/customers/pages/RoomPage';
+import { AboutPage } from '../features/customers/pages/AboutPage';
 
 /**
  * Redirect user based on authentication and role
@@ -115,6 +116,7 @@ const AppRoutes = () => {
       {/* Customer Routes */}
       <Route path={ROUTES.CUSTOMER} element={<CustomerLayout />}>
         <Route index element={<HomePage />} />
+        <Route path="about" element={<AboutPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="profile" element={<ProfilePage />} />
           <Route path="room" element={<RoomPage />} />
