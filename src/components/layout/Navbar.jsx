@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
 import { useAuth } from "../../features/auth";
 
@@ -87,10 +87,10 @@ const getRoleName = (user) => {
 };
 
 export default function Navbar() {
-  const [active, setActive] = useState("Home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
+  const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -98,6 +98,13 @@ export default function Navbar() {
   const displayEmail = user?.email || "Sign in to view your account";
   const displayRole = getRoleName(user);
   const userInitials = getInitials(displayName);
+  const isActiveLink = (link) => {
+    if (link.to === ROUTES.CUSTOMER) {
+      return link.name === "Home" && location.pathname === ROUTES.CUSTOMER;
+    }
+
+    return location.pathname === link.to || location.pathname.startsWith(`${link.to}/`);
+  };
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -173,10 +180,9 @@ export default function Navbar() {
               <li key={link.name}>
                 <Link
                   to={link.to}
-                  onClick={() => setActive(link.name)}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200
                     ${
-                      active === link.name
+                      isActiveLink(link)
                         ? "text-red-600 font-semibold"
                         : "text-gray-700 hover:text-red-500 hover:bg-red-50"
                     }`}
@@ -283,12 +289,11 @@ export default function Navbar() {
                 key={link.name}
                 to={link.to}
                 onClick={() => {
-                  setActive(link.name);
                   setMenuOpen(false);
                 }}
                 className={`block px-4 py-3 text-sm font-medium border-b border-gray-100 last:border-b-0 transition-colors
                   ${
-                    active === link.name
+                    isActiveLink(link)
                       ? "text-red-600 font-semibold"
                       : "text-gray-700 hover:text-red-500"
                   }`}
