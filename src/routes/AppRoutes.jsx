@@ -120,6 +120,12 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="profile" element={<ProfilePage />} />
           <Route path="room" element={<RoomPage />} />
+
+
+
+
+
+          
         </Route>
       </Route>
 
