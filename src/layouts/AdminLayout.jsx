@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
-import DashboardHeader from '../features/dashboard/components/DashboardHeader';
-import DashboardSidebar from '../features/dashboard/components/DashboardSidebar';
-import { navItems } from '../features/dashboard/constants/dashboard.data';
+import DashboardHeader from '../pages/admin/dashboard/components/DashboardHeader';
+import DashboardSidebar from '../pages/admin/dashboard/components/DashboardSidebar';
+import { navItems } from '../pages/admin/dashboard/constants/dashboard.data';
 
 export const AdminLayout = () => {
   const location = useLocation();

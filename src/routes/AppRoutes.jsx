@@ -19,7 +19,7 @@ import LoginPage from '../pages/auth/LoginPage';
 import NotFoundPage from '../pages/auth/NotFoundPage';
 
 // Admin Feature Pages
-import DashboardPage from '../features/dashboard/pages/DashboardPage';
+import DashboardPage from '../pages/admin/DashboardPage';
 import UsersPage from '../features/users/UsersPage';
 import BookingsPage from '../features/bookings/BookingsPage';
 import RoomsPage from '../features/rooms/page/RoomsPage';
