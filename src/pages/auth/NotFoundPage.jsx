@@ -10,7 +10,7 @@ export default function NotFoundPage() {
         The page you were looking for does not exist or has been moved into the new feature-based structure.
       </p>
       <Link
-        to={ROUTES.ROOT}
+        to={'/'}
         className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
       >
         Return home

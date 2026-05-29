@@ -1,5 +1,5 @@
-import StatCard from '../components/StatCard';
-import DashboardIcon from '../components/DashboardIcon';
+import StatCard from './dashboard/components/StatCard';
+import DashboardIcon from './dashboard/components/DashboardIcon';
 import {
   destinationBreakdown,
   messageThreads,
@@ -8,7 +8,7 @@ import {
   stats,
   tripSummary,
   upcomingTrips,
-} from '../constants/dashboard.data';
+} from './dashboard/constants/dashboard.data';
 
 const maxRevenue = Math.max(...revenuePoints.map((point) => point.value));
 

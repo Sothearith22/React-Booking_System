@@ -1,1 +1,1 @@
-export { useDashboard } from '../features/dashboard/hooks/useDashboard';
+export { useDashboard } from '../pages/admin/dashboard/hooks/useDashboard';

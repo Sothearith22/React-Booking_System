@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../../constants/routes';
-import { useAuth } from '../../auth';
+import { ROUTES } from '../../../../constants/routes';
+import { useAuth } from '../../../../features/auth';
 import DashboardIcon from './DashboardIcon';
 import { Loader2 } from 'lucide-react';
 

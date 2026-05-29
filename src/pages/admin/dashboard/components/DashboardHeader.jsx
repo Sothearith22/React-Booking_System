@@ -1,5 +1,5 @@
 import DashboardIcon from './DashboardIcon';
-import { useAuth } from '../../auth';
+import { useAuth } from '../../../../features/auth';
 
 export default function DashboardHeader({ title, subtitle }) {
   const { user } = useAuth();
