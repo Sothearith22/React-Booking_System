@@ -10,6 +10,28 @@ export const ROLES = {
   CUSTOMER: 'customer',
 };
 
+export const ROUTES = {
+  ROOT: '/',
+  LOGIN: '/login',
+  REGISTER: '/register',
+  ADMIN: '/admin',
+  ADMIN_DASHBOARD: '/admin/dashboard',
+  ADMIN_USERS: '/admin/users',
+  ADMIN_SERVICE: '/admin/service',
+  ADMIN_BOOKINGS: '/admin/bookings',
+  ADMIN_ROOMS: '/admin/rooms',
+  ADMIN_CATEGORIES: '/admin/categories',
+  ADMIN_REVIEWS: '/admin/reviews',
+  ADMIN_INVENTORY: '/admin/inventory',
+  ADMIN_AVAILABILITY: '/admin/availability',
+  CUSTOMER: '/',
+  CUSTOMER_PROFILE: '/profile',
+  CUSTOMER_ROOM: '/room',
+  CUSTOMER_SERVICE: '/service',
+  CUSTOMER_ABOUT: '/about',
+  CUSTOMER_CONTACT: '/contact',
+};
+
 export const BOOKING_STATUS = {
   PENDING: 'pending',
   CONFIRMED: 'confirmed',

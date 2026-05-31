@@ -31,7 +31,11 @@ export const API_ENDPOINTS = {
   },
   services: {
     list: '/admin/services',
+    detail: (id) => `/admin/services/${id}`,
   },
+  // services: {
+  //   list: '/admin/services',
+  // },
   uploads: {
     roomImage: '/admin/roomimage',
   },

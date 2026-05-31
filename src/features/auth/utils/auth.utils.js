@@ -4,8 +4,8 @@ import {
   AUTH_USER_STORAGE_KEY,
   COOKIE_OPTIONS,
   ROLES,
+  ROUTES,
 } from '../../../constants/appConstants';
-import { ROUTES } from '../../../constants/routes';
 
 const ROLE_ID_MAP = {
   1: ROLES.ADMIN,

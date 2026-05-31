@@ -5,7 +5,7 @@ import {
   AUTH_USER_STORAGE_KEY,
   COOKIE_OPTIONS,
 } from '../../constants/appConstants';
-import { ROUTES } from '../../constants/routes';
+import { ROUTES } from '../../constants/appConstants';
 import { authService } from '../../services/auth.service';
 import {
   extractAuthToken,
@@ -243,7 +243,7 @@ export function AuthProvider({ children }) {
       return {
         status: 'success',
         message: response?.data?.message || 'Account created successfully.',
-        redirectTo: ROUTES.LOGIN,
+        redirectTo: "/login",
       };
     } catch (error) {
       return {

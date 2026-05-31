@@ -3,16 +3,20 @@ import Modal from "../../../components/ui/Modal";
 import Select from "../../../components/ui/Select";
 import {
   ROOM_INPUT_CLASS,
-  ROOM_STATUS_OPTIONS,
   ROOM_TEXTAREA_CLASS,
-} from "../constants/room.constants";
+} from "../../rooms/constants/room.constants";
 
-export default function RoomModal({
+const CATEGORY_STATUS_OPTIONS = [
+  { value: "available", label: "Available" },
+  { value: "unavailable", label: "Unavailable" },
+];
+
+export default function CategoryModal({
   isOpen,
   onClose,
   onSubmit,
-  editRoom,
-  roomForm = {},
+  editCategory,
+  categoryForm = {},
   formError,
   isSaving = false,
   onFieldChange = () => {},
@@ -24,7 +28,7 @@ export default function RoomModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={editRoom ? "Edit Service" : "Add New Service"}
+      title={editCategory ? "Edit Service" : "Add New Service"}
       className="max-w-[42rem]"
       contentClassName="p-0"
     >
@@ -42,7 +46,7 @@ export default function RoomModal({
               <input
                 className={`${ROOM_INPUT_CLASS} min-h-14 rounded-2xl text-base`}
                 placeholder="e.g. Premium Consultation"
-                value={roomForm.name || ""}
+                value={categoryForm.name || ""}
                 onChange={(event) => onFieldChange("name", event.target.value)}
               />
             </div>
@@ -55,7 +59,7 @@ export default function RoomModal({
                 min="0"
                 step="0.01"
                 placeholder="e.g. 150.00"
-                value={roomForm.price || ""}
+                value={categoryForm.price || ""}
                 onChange={(event) => onFieldChange("price", event.target.value)}
               />
             </div>
@@ -68,7 +72,7 @@ export default function RoomModal({
                 min="1"
                 step="1"
                 placeholder="e.g. 60"
-                value={roomForm.duration || ""}
+                value={categoryForm.duration || ""}
                 onChange={(event) => onFieldChange("duration", event.target.value)}
               />
             </div>
@@ -77,10 +81,10 @@ export default function RoomModal({
               <label className={labelClassName}>Status</label>
               <Select
                 className="min-h-14 rounded-2xl text-base"
-                value={roomForm.status || "available"}
+                value={categoryForm.status || "available"}
                 onChange={(event) => onFieldChange("status", event.target.value)}
               >
-                {ROOM_STATUS_OPTIONS.map((status) => (
+                {CATEGORY_STATUS_OPTIONS.map((status) => (
                   <option key={status.value} value={status.value}>
                     {status.label}
                   </option>
@@ -94,7 +98,7 @@ export default function RoomModal({
                 className={`${ROOM_TEXTAREA_CLASS} rounded-2xl text-base`}
                 rows={4}
                 placeholder="A one-hour deep dive into project strategy."
-                value={roomForm.description || ""}
+                value={categoryForm.description || ""}
                 onChange={(event) =>
                   onFieldChange("description", event.target.value)
                 }
@@ -118,7 +122,7 @@ export default function RoomModal({
             className="min-h-14 rounded-2xl text-base shadow-lg shadow-blue-500/20 sm:min-w-[12rem]"
             disabled={isSaving}
           >
-            {isSaving ? "Saving..." : editRoom ? "Update Service" : "Save Service"}
+            {isSaving ? "Saving..." : editCategory ? "Update Service" : "Save Service"}
           </Button>
         </div>
       </form>

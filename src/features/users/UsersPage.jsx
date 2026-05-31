@@ -20,11 +20,11 @@ const ROWS_PER_PAGE = 5;
 const DEFAULT_NEW_USER = {
   name: '',
   email: '',
-  role: 'staff',
+  role: 'customer',
 };
 
 const ROLE_ORDER = ['admin', 'manager', 'receptionist', 'staff', 'customer'];
-const CREATE_ROLE_ORDER = ['staff', 'receptionist', 'manager', 'admin'];
+const CREATE_ROLE_ORDER = ['customer', 'receptionist', 'manager', 'admin'];
 
 const ROLE_CONFIG = {
   admin: {
@@ -83,7 +83,6 @@ const StatCard = ({ label, value, subtitle, subtitleColor }) => (
     </div>
   </div>
 );
-
 const UsersPage = () => {
   const {
     loading,

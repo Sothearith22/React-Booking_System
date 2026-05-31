@@ -1,13 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import PageLoader from '../components/common/Loader';
-import { ROLES } from '../constants/appConstants';
-import { ROUTES } from '../constants/routes';
+import { ROLES, ROUTES } from '../constants/appConstants';
 
-import { useAuth } from '../features/auth';
 import { GuestRoute } from './GuestRoute';
 import { ProtectedRoute } from './ProtectedRoute';
-import { getDefaultRedirectPath } from '../features/auth/utils/auth.utils';
 
 // Layouts
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -23,7 +19,7 @@ import DashboardPage from '../pages/admin/DashboardPage';
 import UsersPage from '../features/users/UsersPage';
 import BookingsPage from '../features/bookings/BookingsPage';
 import RoomsPage from '../features/rooms/page/RoomsPage';
-import RoomCategoriesPage from '../features/rooms/page/RoomCategoriesPage';
+import RoomCategoriesPage from '../features/category/RoomCategoryPage';
 import ReviewsPage from '../features/reviews/ReviewsPage';
 import InventoryPage from '../features/inventory/InventoryPage';
 import ServiceAvailabilityPage from '../features/services/ServiceAvailabilityPage';
@@ -34,33 +30,9 @@ import { ProfilePage } from '../features/customers/pages/ProfilePage';
 import { RoomPage } from '../features/customers/pages/RoomPage';
 import { AboutPage } from '../features/customers/pages/AboutPage';
 
-/**
- * Redirect user based on authentication and role
- */
-const RootRedirect = () => {
-  const { user, isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return <PageLoader />;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to={ROUTES.LOGIN} replace />;
-  }
-
-  if (!user) {
-    return <PageLoader />;
-  }
-
-  return <Navigate to={getDefaultRedirectPath(user)} replace />;
-};
-
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Root Redirect */}
-      <Route path={ROUTES.ROOT} element={<RootRedirect />} />
-
       {/* Authentication Routes */}
       <Route
         path={ROUTES.LOGIN}
@@ -104,6 +76,8 @@ const AppRoutes = () => {
           <Route path="bookings" element={<BookingsPage />} />
           <Route path="rooms" element={<RoomsPage />} />
           <Route path="reviews" element={<ReviewsPage />} />
+          <Route path="service" element={<Navigate to={ROUTES.ADMIN_CATEGORIES} replace />} />
+          <Route path="services" element={<Navigate to={ROUTES.ADMIN_CATEGORIES} replace />} />
           <Route path="categories" element={<RoomCategoriesPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route
@@ -116,16 +90,10 @@ const AppRoutes = () => {
       {/* Customer Routes */}
       <Route path={ROUTES.CUSTOMER} element={<CustomerLayout />}>
         <Route index element={<HomePage />} />
-        <Route path="about" element={<AboutPage />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="room" element={<RoomPage />} />
-
-
-
-
-
-          
+        <Route path={ROUTES.CUSTOMER_ABOUT.slice(1)} element={<AboutPage />} />
+        <Route element={<ProtectedRoute allowedRoles={[ROLES.CUSTOMER]} />}>
+          <Route path={ROUTES.CUSTOMER_PROFILE.slice(1)} element={<ProfilePage />} />
+          <Route path={ROUTES.CUSTOMER_ROOM.slice(1)} element={<RoomPage />} />
         </Route>
       </Route>
 

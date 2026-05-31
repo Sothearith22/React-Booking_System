@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { ROUTES } from "../constants/routes";
+import { ROUTES } from "../constants/appConstants";
 import { useAuth } from "../features/auth";
 import { getUserRoles } from "../features/auth/utils/auth.utils";
 
@@ -14,7 +14,7 @@ export function RoleRoute({ children, roles }) {
   const userRoles = getUserRoles(user);
 
   if (!userRoles.some((role) => allowedRoles.includes(role))) {
-    return <Navigate to={ROUTES.ROOT} replace />; 
+    return <Navigate to={"/"} replace />; 
   }
 
   return children;

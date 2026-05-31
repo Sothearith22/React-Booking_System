@@ -1,4 +1,4 @@
-// room.constants.js
+
 
 export const ROWS_PER_PAGE = 10;
 
@@ -37,6 +37,13 @@ export const STATUS_CONFIG = {
     text: 'text-rose-700',
     border: 'border-rose-100',
   },
+  unavailable: {
+    label: 'Unavailable',
+    dot: 'bg-slate-400',
+    bg: 'bg-slate-50',
+    text: 'text-slate-600',
+    border: 'border-slate-200',
+  },
 };
 
 export const ROOM_TYPE_MAP = {
@@ -48,18 +55,13 @@ export const ROOM_TYPE_MAP = {
 
 export const ROOM_STATUS_OPTIONS = [
   { value: 'available', label: 'Available' },
-  { value: 'booked', label: 'Booked' },
-  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'unavailable', label: 'Unavailable' },
 ];
 
 export const EMPTY_ROOM_FORM = {
-  service_id: '',
   name: '',
-  capacity: '1',
-  amenities: '',
-  sort_order: '1',
-  price_per_night: '',
-  status: 'available',
   description: '',
-  images: [],
+  price: '',
+  duration: '',
+  status: 'available',
 };

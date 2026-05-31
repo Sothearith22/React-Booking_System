@@ -1,33 +1,20 @@
-// import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
-// import { useAuth } from '../features/auth';
-// import {
-//   CUSTOMER_HOME_PATH,
-//   CUSTOMER_PROFILE_PATH,
-//   DASHBOARD_HOME_PATH,
-//   isAdminUser,
-// } from '../features/auth/utils/auth.utils';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import { Outlet } from 'react-router-dom';
+import Loader from '../components/common/Loader';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../features/auth';
+import { getDefaultRedirectPath, isAdminUser } from '../features/auth/utils/auth.utils';
 
 export const CustomerLayout = () => {
-  // const { isAuthenticated, user, logout } = useAuth();
-  // const navigate = useNavigate();
-  // const navigationItems = [
-  //   { label: 'Home', to: CUSTOMER_HOME_PATH, end: true },
-  //   ...(isAuthenticated ? [{ label: 'Profile', to: CUSTOMER_PROFILE_PATH }] : []),
-  // ];
+  const { isAuthenticated, loading, user } = useAuth();
 
-  // const linkClassName = ({ isActive }) =>
-  //   `rounded-full px-4 py-2 text-sm font-medium transition ${
-  //     isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-200'
-  //   }`;
+  if (loading) {
+    return <Loader message="Checking access..." />;
+  }
 
-  // const handleLogout = async () => {
-  //   await logout();
-  //   navigate(ROUTES.LOGIN, { replace: true });
-  // };
+  if (isAuthenticated && isAdminUser(user)) {
+    return <Navigate to={getDefaultRedirectPath(user)} replace />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
