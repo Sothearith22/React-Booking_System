@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { ROUTES } from '../../constants/routes';
+import { ROUTES } from '../../constants/appConstants';
 import { useAuth } from '../../features/auth';
 import { AuthLayout } from '../../layouts/AuthLayout';
 import { getDefaultRedirectPath } from '../../features/auth/utils/auth.utils';

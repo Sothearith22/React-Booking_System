@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../constants/routes';
+import { ROUTES } from '../../constants/appConstants';
 import useFetch from '../../hooks/useFetch';
 import { validateForm } from '../../utils/validateForm';
 import { useAuth } from './hooks/useAuth';

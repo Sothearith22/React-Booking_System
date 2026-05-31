@@ -13,8 +13,8 @@ export const navItems = [
     label: 'Categories',
     icon: 'services',
     to: '/admin/categories',
-    headerTitle: 'Room Categories',
-    headerSubtitle: 'Manage your hotel room types and pricing.'
+    headerTitle: 'Service Categories',
+    headerSubtitle: 'Manage your hotel service types and pricing.'
   },
   {
     id: 'rooms',

@@ -43,6 +43,8 @@ export const normalizeRoom = (room) => {
     ...room,
     id: room?.id ?? fallbackId,
     name,
+    price: Number(room?.price ?? room?.price_per_night ?? 0),
+    duration: Number(room?.duration ?? 0),
     service_id: room?.service_id ?? room?.service?.id ?? '',
     room_number: room?.room_number || room?.number || '',
     room_type:
@@ -68,31 +70,20 @@ export const normalizeRoom = (room) => {
 
 export const mapRoomToForm = (room = {}) => ({
   ...EMPTY_ROOM_FORM,
-  service_id: room?.service_id ? String(room.service_id) : room?.service?.id ? String(room.service.id) : '',
   name: room?.name || '',
-  capacity: String(room?.capacity ?? 1),
-  amenities: Array.isArray(room?.amenities) ? room.amenities.map(getAmenityLabel).filter(Boolean).join(', ') : '',
-  sort_order: String(room?.sort_order ?? 1),
-  price_per_night: room?.price_per_night ?? '',
-  status: room?.status || 'available',
   description: room?.description || '',
-  images: [],
+  price: String(room?.price ?? room?.price_per_night ?? ''),
+  duration: String(room?.duration ?? ''),
+  status: room?.status || 'available',
 });
 
 export const buildRoomPayload = (roomForm) => {
-  const amenities = String(roomForm?.amenities ?? '')
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
   const payload = {
-    service_id: Number(roomForm?.service_id ?? 0),
     name: String(roomForm?.name ?? '').trim(),
     description: String(roomForm?.description ?? '').trim(),
-    is_active: roomForm?.status !== 'maintenance',
-    price_per_night: Number(roomForm?.price_per_night ?? 0),
-    capacity: Number(roomForm?.capacity ?? 1),
-    amenities,
-    sort_order: Number(roomForm?.sort_order ?? 1),
+    price: Number(roomForm?.price ?? 0),
+    duration: Number(roomForm?.duration ?? 0),
+    status: roomForm?.status || 'available',
   };
   return payload;
 };

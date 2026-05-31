@@ -9,7 +9,7 @@ import {
   Users,
   Wifi,
 } from 'lucide-react';
-import { ROUTES } from '../../../constants/routes';
+import { ROUTES } from '../../../constants/appConstants';
 
 const stats = [
   { label: 'Rooms Available', value: '180+', icon: Hotel },

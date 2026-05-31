@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { API_BASE_URL } from '../constants/apiEndpoints';
 import { AUTH_TOKEN_COOKIE, COOKIE_OPTIONS } from '../constants/appConstants';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '../constants/appConstants';
 import { clearAuthCookies, extractAuthToken } from '../features/auth/utils/auth.utils';
 
 const api = axios.create({

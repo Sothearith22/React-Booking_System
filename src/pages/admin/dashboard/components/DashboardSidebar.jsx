@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../../../constants/routes';
+import { ROUTES } from '../../../../constants/appConstants';
 import { useAuth } from '../../../../features/auth';
 import DashboardIcon from './DashboardIcon';
 import { Loader2 } from 'lucide-react';
@@ -25,7 +25,7 @@ export default function DashboardSidebar({ navItems = [] }) {
               <DashboardIcon name="logo" className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xl font-black tracking-tight text-zinc-950">Travelie</p>
+              <p className="text-xl font-black tracking-tight text-zinc-950">Admin Panel</p>
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Admin Panel</p>
             </div>
           </div>

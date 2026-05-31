@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import Loader from '../components/common/Loader';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '../constants/appConstants';
 import { useAuth } from '../features/auth';
 import { getDefaultRedirectPath, getUserRoles } from '../features/auth/utils/auth.utils';
 
