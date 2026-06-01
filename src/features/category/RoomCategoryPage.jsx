@@ -11,7 +11,6 @@ import { roomService } from '../rooms/services/room.service';
 import { getServiceList, normalizeServiceOption } from '../rooms/utils/service.utils';
 import { EMPTY_CATEGORY_FORM, mapCategoryToForm } from './utils/category.utils';
 
-// Main Page
 
 const RoomCategoryPage = () => {
   const { categories, loading, error, setError, refetch } = useServiceCategory();
