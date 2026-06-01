@@ -36,7 +36,6 @@ const normalizePayment = (payment) => {
   if (['refunded', 'refund'].includes(value)) return 'refunded';
   return 'unpaid';
 };
-
 const getBookable = (booking = {}) =>
   booking.bookable ||
   booking.room_availability?.room ||
@@ -60,9 +59,7 @@ const normalizeBooking = (booking = {}) => {
   const bookable = getBookable(booking);
   const bookingType = getBookingType(booking);
   const guestName =
-    booking.guest_name ||
     booking.customer_name ||
-    booking.user?.name ||
     booking.customer?.name ||
     `User #${booking.user_id || booking.customer_id || 'Guest'}`;
   const roomName =
