@@ -35,22 +35,25 @@ export const roomService = {
     return unwrapResponse(response);
   },
 
-  async uploadRoomImage(roomId, file, sortOrder = 1) {
+  async uploadRoomImage(roomId, file, sortOrder = 1, description = '') {
     const formData = new FormData();
     formData.append('room_id', String(roomId));
     formData.append('image', file);
     formData.append('sort_order', String(sortOrder));
+    formData.append('description', String(description ?? ''));
 
     const response = await uploadService.upload(API_ENDPOINTS.uploads.roomImage, formData);
 
     return unwrapResponse(response);
   },
 
-  async uploadRoomImages(roomId, files = []) {
+  async uploadRoomImages(roomId, files = [], description = '') {
     const imageFiles = files.filter((file) => file instanceof File);
 
     return Promise.all(
-      imageFiles.map((file, index) => this.uploadRoomImage(roomId, file, index + 1))
+      imageFiles.map((file, index) =>
+        this.uploadRoomImage(roomId, file, index + 1, description)
+      )
     );
   },
 };

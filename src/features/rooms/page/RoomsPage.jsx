@@ -173,7 +173,7 @@ export default function RoomsPage() {
       const roomId = getSavedRoomId(savedRoom, editRoom?.id);
 
       if (roomId && imageFiles.length > 0) {
-        await roomService.uploadRoomImages(roomId, imageFiles);
+        await roomService.uploadRoomImages(roomId, imageFiles, payload.description);
       }
 
       await refetch();

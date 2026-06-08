@@ -15,7 +15,11 @@ export default function RoomModal({
   roomForm = {},
   formError,
   isSaving = false,
+  serviceOptions = [],
+  servicesLoading = false,
+  servicesError = "",
   onFieldChange = () => {},
+  onImagesChange = () => {},
 }) {
   const labelClassName =
     "mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-800";
@@ -24,7 +28,7 @@ export default function RoomModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={editRoom ? "Edit Service" : "Add New Service"}
+      title={editRoom ? "Edit Room" : "Add New Room"}
       className="max-w-[42rem]"
       contentClassName="p-0"
     >
@@ -38,47 +42,76 @@ export default function RoomModal({
 
           <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className={labelClassName}>Name</label>
+              <label className={labelClassName}>Category / Service</label>
+              <Select
+                className="min-h-14 rounded-2xl text-base"
+                value={roomForm.service_id || ""}
+                onChange={(event) => onFieldChange("service_id", event.target.value)}
+                disabled={servicesLoading}
+                required
+              >
+                <option value="">
+                  {servicesLoading ? "Loading services..." : "Select category"}
+                </option>
+                {serviceOptions.map((service) => (
+                  <option key={service.value} value={service.value}>
+                    {service.label}
+                  </option>
+                ))}
+              </Select>
+              {servicesError ? (
+                <p className="mt-2 text-xs font-semibold text-red-600">{servicesError}</p>
+              ) : null}
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className={labelClassName}>Room Name</label>
               <input
                 className={`${ROOM_INPUT_CLASS} min-h-14 rounded-2xl text-base`}
-                placeholder="e.g. Premium Consultation"
+                placeholder="e.g. Standard Single Room"
                 value={roomForm.name || ""}
                 onChange={(event) => onFieldChange("name", event.target.value)}
+                required
               />
             </div>
 
             <div>
-              <label className={labelClassName}>Price</label>
+              <label className={labelClassName}>Price Per Night</label>
               <input
                 className={`${ROOM_INPUT_CLASS} min-h-14 rounded-2xl text-base`}
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder="e.g. 150.00"
-                value={roomForm.price || ""}
-                onChange={(event) => onFieldChange("price", event.target.value)}
+                placeholder="e.g. 45.00"
+                value={roomForm.price_per_night || ""}
+                onChange={(event) => onFieldChange("price_per_night", event.target.value)}
+                required
               />
             </div>
 
             <div>
-              <label className={labelClassName}>Duration</label>
+              <label className={labelClassName}>Capacity</label>
               <input
                 className={`${ROOM_INPUT_CLASS} min-h-14 rounded-2xl text-base`}
                 type="number"
                 min="1"
                 step="1"
-                placeholder="e.g. 60"
-                value={roomForm.duration || ""}
-                onChange={(event) => onFieldChange("duration", event.target.value)}
+                placeholder="e.g. 1"
+                value={roomForm.capacity || ""}
+                onChange={(event) => onFieldChange("capacity", event.target.value)}
+                required
               />
             </div>
 
-            <div className="sm:col-span-2">
+            <div>
               <label className={labelClassName}>Status</label>
               <Select
                 className="min-h-14 rounded-2xl text-base"
                 value={roomForm.status || "available"}
-                onChange={(event) => onFieldChange("status", event.target.value)}
+                onChange={(event) => {
+                  onFieldChange("status", event.target.value);
+                  onFieldChange("is_active", event.target.value === "available");
+                }}
               >
                 {ROOM_STATUS_OPTIONS.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -88,17 +121,59 @@ export default function RoomModal({
               </Select>
             </div>
 
+            <div>
+              <label className={labelClassName}>Sort Order</label>
+              <input
+                className={`${ROOM_INPUT_CLASS} min-h-14 rounded-2xl text-base`}
+                type="number"
+                min="0"
+                step="1"
+                placeholder="e.g. 1"
+                value={roomForm.sort_order || ""}
+                onChange={(event) => onFieldChange("sort_order", event.target.value)}
+              />
+            </div>
+
             <div className="sm:col-span-2">
               <label className={labelClassName}>Description</label>
               <textarea
                 className={`${ROOM_TEXTAREA_CLASS} rounded-2xl text-base`}
                 rows={4}
-                placeholder="A one-hour deep dive into project strategy."
+                placeholder="A cozy room for solo travelers featuring a twin bed and a workspace."
                 value={roomForm.description || ""}
                 onChange={(event) =>
                   onFieldChange("description", event.target.value)
                 }
               />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className={labelClassName}>Amenities</label>
+              <input
+                className={`${ROOM_INPUT_CLASS} min-h-14 rounded-2xl text-base`}
+                placeholder="Wi-Fi, Coffee Maker, Desk"
+                value={roomForm.amenities || ""}
+                onChange={(event) => onFieldChange("amenities", event.target.value)}
+              />
+              <p className="mt-2 text-xs font-semibold text-slate-500">
+                Separate amenities with commas.
+              </p>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className={labelClassName}>Room Images</label>
+              <input
+                className={`${ROOM_INPUT_CLASS} min-h-14 rounded-2xl text-base`}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(event) => onImagesChange(event.target.files)}
+              />
+              {roomForm.images?.length ? (
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  {roomForm.images.length} image{roomForm.images.length === 1 ? "" : "s"} selected.
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
@@ -118,7 +193,7 @@ export default function RoomModal({
             className="min-h-14 rounded-2xl text-base shadow-lg shadow-blue-500/20 sm:min-w-[12rem]"
             disabled={isSaving}
           >
-            {isSaving ? "Saving..." : editRoom ? "Update Service" : "Save Service"}
+            {isSaving ? "Saving..." : editRoom ? "Update Room" : "Save Room"}
           </Button>
         </div>
       </form>
