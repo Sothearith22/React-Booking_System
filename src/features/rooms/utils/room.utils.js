@@ -70,21 +70,38 @@ export const normalizeRoom = (room) => {
 
 export const mapRoomToForm = (room = {}) => ({
   ...EMPTY_ROOM_FORM,
+  service_id: String(room?.service_id ?? room?.service?.id ?? ''),
   name: room?.name || '',
   description: room?.description || '',
-  price: String(room?.price ?? room?.price_per_night ?? ''),
-  duration: String(room?.duration ?? ''),
-  status: room?.status || 'available',
+  price_per_night: String(room?.price_per_night ?? room?.price ?? ''),
+  capacity: String(room?.capacity ?? 1),
+  amenities: Array.isArray(room?.amenities) ? room.amenities.join(', ') : '',
+  is_active: room?.is_active !== false,
+  sort_order: String(room?.sort_order ?? 1),
+  images: [],
+  status: room?.is_active === false ? 'unavailable' : 'available',
 });
 
 export const buildRoomPayload = (roomForm) => {
+  const isActive =
+    typeof roomForm?.is_active === 'boolean'
+      ? roomForm.is_active
+      : roomForm?.status !== 'unavailable';
+
   const payload = {
+    service_id: String(roomForm?.service_id ?? ''),
     name: String(roomForm?.name ?? '').trim(),
     description: String(roomForm?.description ?? '').trim(),
-    price: Number(roomForm?.price ?? 0),
-    duration: Number(roomForm?.duration ?? 0),
-    status: roomForm?.status || 'available',
+    price_per_night: Number(roomForm?.price_per_night ?? 0),
+    capacity: Number(roomForm?.capacity ?? 1),
+    amenities: String(roomForm?.amenities ?? '')
+      .split(',')
+      .map((amenity) => amenity.trim())
+      .filter(Boolean),
+    is_active: isActive,
+    sort_order: Number(roomForm?.sort_order ?? 1),
   };
+
   return payload;
 };
 export const getServiceList = (payload) => {

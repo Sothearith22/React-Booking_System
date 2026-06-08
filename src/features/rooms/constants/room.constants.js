@@ -1,6 +1,6 @@
 
 
-export const ROWS_PER_PAGE = 10;
+export const ROWS_PER_PAGE = 6;
 
 export const ROOM_INPUT_CLASS =
   'w-full rounded-xl border border-gray-200 bg-gray-50 px-5 py-3.5 text-base text-gray-800 transition-all placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20';
@@ -59,9 +59,14 @@ export const ROOM_STATUS_OPTIONS = [
 ];
 
 export const EMPTY_ROOM_FORM = {
+  service_id: '',
   name: '',
   description: '',
-  price: '',
-  duration: '',
+  price_per_night: '',
+  capacity: '1',
+  amenities: '',
+  is_active: true,
+  sort_order: '1',
+  images: [],
   status: 'available',
 };

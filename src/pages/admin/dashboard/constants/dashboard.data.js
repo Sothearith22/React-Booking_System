@@ -8,18 +8,18 @@ export const navItems = [
     headerSubtitle: 'Track your hotel performance and operations.',
     end: true
   },
-  {
-    id: 'categories',
-    label: 'Categories',
+    {
+    id: 'services',
+    label: 'Services',
     icon: 'services',
-    to: '/admin/categories',
-    headerTitle: 'Service Categories',
-    headerSubtitle: 'Manage your hotel service types and pricing.'
+    to: '/admin/services',
+    headerTitle: 'Service Management',
+    headerSubtitle: 'Manage your hotel service offerings and pricing.'
   },
   {
     id: 'rooms',
     label: 'Rooms',
-    icon: 'bookings',
+    icon: 'rooms',
     to: '/admin/rooms',
     headerTitle: 'Room Management',
     headerSubtitle: 'Monitor and update individual room status.'
@@ -34,35 +34,43 @@ export const navItems = [
   },
   {
     id: 'users',
-    label: 'Users',
+    label: 'Customers',
     icon: 'guests',
     to: '/admin/users',
-    headerTitle: 'User Accounts',
-    headerSubtitle: 'Manage staff and customer access.'
-  },
-  {
-    id: 'reviews',
-    label: 'Reviews',
-    icon: 'sparkle',
-    to: '/admin/reviews',
-    headerTitle: 'Guest Reviews',
-    headerSubtitle: 'Monitor guest feedback and ratings.'
-  },
-  {
-    id: 'inventory',
-    label: 'Inventory',
-    icon: 'finance',
-    to: '/admin/inventory',
-    headerTitle: 'Inventory Tracking',
-    headerSubtitle: 'Manage your hotel supplies and stock.'
+    headerTitle: 'Customers',
+    headerSubtitle: 'Manage guest profiles and customer access.'
   },
   {
     id: 'availability',
     label: 'Availability',
-    icon: 'staff',
+    icon: 'calendar',
     to: '/admin/availability',
-    headerTitle: 'Service Availability',
-    headerSubtitle: 'Track service uptime and scheduling.'
+    headerTitle: 'Room Availability',
+    headerSubtitle: 'Check and manage room availability across different dates.'
+  },
+  {
+    id: 'products',
+    label: 'Products',
+    icon: 'products',
+    to: '/admin/products',
+    headerTitle: 'Product Management',
+    headerSubtitle: 'Manage your hotel products and services.'
+  },
+  {
+    id: 'categories',
+    label: 'Categories',
+    icon: 'categories',
+    to: '/admin/categories',
+    headerTitle: 'Category Management',
+    headerSubtitle: 'Organize rooms and services into categories.'
+  },
+  {
+    id: 'reports',
+    label: 'Reports',
+    icon: 'reports',
+    to: '/admin/reports',
+    headerTitle: 'Reports',
+    headerSubtitle: 'Review hotel revenue, occupancy, and service trends.'
   },
   {
     id: 'settings',
@@ -75,20 +83,66 @@ export const navItems = [
 ];
 
 export const stats = [
-  { title: 'Total Revenue', value: '28,430', trend: '+12.5%', icon: 'finance', iconTone: 'bg-emerald-100 text-emerald-600', trendTone: 'bg-emerald-50 text-emerald-600' },
-  { title: 'Total Bookings', value: '1,240', trend: '+8.2%', icon: 'bookings', iconTone: 'bg-sky-100 text-sky-600', trendTone: 'bg-sky-50 text-sky-600' },
-  { title: 'Active Guests', value: '432', trend: '+4.1%', icon: 'guests', iconTone: 'bg-amber-100 text-amber-600', trendTone: 'bg-amber-50 text-amber-600' },
-  { title: 'Staff on Duty', value: '48', trend: '0%', icon: 'staff', iconTone: 'bg-indigo-100 text-indigo-600', trendTone: 'bg-zinc-100 text-zinc-600' },
+  { title: 'Occupancy Rate', value: '84%', trend: '+2.4%', detail: '', icon: 'occupancy' },
+  { title: 'Total Revenue', value: '$42,500', trend: '+12.5%', detail: '', icon: 'finance' },
+  { title: 'Active Bookings', value: '124', trend: '', detail: 'This week', icon: 'bookings' },
+  { title: 'Available Rooms', value: '12', trend: '', detail: 'Out of 150', icon: 'rooms' },
 ];
 
 export const revenuePoints = [
-  { label: 'Mon', value: 4500 },
-  { label: 'Tue', value: 5200 },
-  { label: 'Wed', value: 4800 },
-  { label: 'Thu', value: 6100 },
-  { label: 'Fri', value: 7500, highlight: true },
-  { label: 'Sat', value: 8200 },
-  { label: 'Sun', value: 7800 },
+  { label: 'Mon', value: 42 },
+  { label: 'Tue', value: 63 },
+  { label: 'Wed', value: 52 },
+  { label: 'Thu', value: 84, highlight: true },
+  { label: 'Fri', value: 73 },
+  { label: 'Sat', value: 94 },
+  { label: 'Sun', value: 68 },
+];
+
+export const recentActivities = [
+  {
+    id: 1,
+    icon: 'user-plus',
+    iconTone: 'bg-indigo-100 text-blue-700',
+    title: 'New booking by',
+    highlight: 'Alex Johnson',
+    meta: '2 mins ago • Deluxe Suite',
+  },
+  {
+    id: 2,
+    icon: 'cleaning',
+    iconTone: 'bg-orange-100 text-orange-700',
+    title: 'Room 302 marked for Cleaning',
+    meta: '15 mins ago • Housekeeping',
+  },
+  {
+    id: 3,
+    icon: 'card',
+    iconTone: 'bg-teal-200 text-teal-800',
+    title: 'Payment received for Booking #4892',
+    meta: '1 hour ago • $450.00',
+  },
+];
+
+export const upcomingCheckIns = [
+  {
+    id: 1,
+    initials: 'SM',
+    guest: 'Sarah Miller',
+    room: 'Ocean View 405',
+    eta: '14:00 PM',
+    status: 'Confirmed',
+    statusTone: 'bg-teal-100 text-teal-800',
+  },
+  {
+    id: 2,
+    initials: 'DW',
+    guest: 'David Wright',
+    room: 'Standard 112',
+    eta: '15:30 PM',
+    status: 'Pending VIP',
+    statusTone: 'bg-indigo-100 text-slate-800',
+  },
 ];
 
 export const destinationBreakdown = [
