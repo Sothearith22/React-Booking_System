@@ -25,10 +25,11 @@ import InventoryPage from '../features/inventory/InventoryPage';
 import ServiceAvailabilityPage from '../features/services/ServiceAvailabilityPage';
 
 // Customer Feature Pages
-import { HomePage } from '../features/customers/pages/HomePage';
-import { ProfilePage } from '../features/customers/pages/ProfilePage';
-import { RoomPage } from '../features/customers/pages/RoomPage';
-import { AboutPage } from '../features/customers/pages/AboutPage';
+import { HomePage } from '../features/home/pages/HomePage';
+import { ProfilePage } from '../features/home/pages/ProfilePage';
+import { RoomPage } from '../features/home/pages/RoomPage';
+import { AboutPage } from '../features/home/pages/AboutPage';
+import { CategoryRoomsPage } from '../features/home/pages/CategoryRoomsPage';
 
 const AppRoutes = () => {
   return (
@@ -77,7 +78,7 @@ const AppRoutes = () => {
           <Route path="rooms" element={<RoomsPage />} />
           <Route path="reviews" element={<ReviewsPage />} />
           <Route path="service" element={<Navigate to={ROUTES.ADMIN_CATEGORIES} replace />} />
-          <Route path="services" element={<Navigate to={ROUTES.ADMIN_CATEGORIES} replace />} />
+          {/* <Route path="services" element={<Navigate to={ROUTES.ADMIN_CATEGORIES} replace />} /> */}
           <Route path="categories" element={<RoomCategoriesPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route
@@ -94,6 +95,7 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute allowedRoles={[ROLES.CUSTOMER]} />}>
           <Route path={ROUTES.CUSTOMER_PROFILE.slice(1)} element={<ProfilePage />} />
           <Route path={ROUTES.CUSTOMER_ROOM.slice(1)} element={<RoomPage />} />
+          <Route path="room/:categoryId" element={<CategoryRoomsPage />} />
         </Route>
       </Route>
 
