@@ -36,33 +36,80 @@ export default function DashboardIcon({ name, className = 'h-5 w-5' }) {
         <svg {...sharedProps}>
           <rect x="4" y="5" width="16" height="15" rx="2" />
           <path d="M8 3v4M16 3v4M4 10h16" />
+          <path d="m8 15 2 2 5-5" />
+        </svg>
+      );
+    case 'rooms':
+      return (
+        <svg {...sharedProps}>
+          <path d="M6 21V5a2 2 0 0 1 2-2h9a1 1 0 0 1 1 1v17" />
+          <path d="M9 21V7h6v14" />
+          <path d="M12 14h.01" />
+        </svg>
+      );
+    case 'occupancy':
+      return (
+        <svg {...sharedProps}>
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M12 3.5V12l7.4-2.6" />
+          <path d="M12 12v8.5" />
         </svg>
       );
     case 'services':
       return (
         <svg {...sharedProps}>
-          <path d="M7 7h10" />
-          <path d="M5 12h14" />
-          <path d="M8 17h8" />
-          <circle cx="9" cy="7" r="2" />
-          <circle cx="15" cy="17" r="2" />
+          <path d="M4 7h10" />
+          <path d="M18 7h2" />
+          <path d="M4 12h3" />
+          <path d="M11 12h9" />
+          <path d="M4 17h11" />
+          <path d="M19 17h1" />
+          <circle cx="16" cy="7" r="2" />
+          <circle cx="9" cy="12" r="2" />
+          <circle cx="17" cy="17" r="2" />
         </svg>
       );
     case 'guests':
       return (
         <svg {...sharedProps}>
           <circle cx="9" cy="8" r="3" />
-          <path d="M4.5 18a4.5 4.5 0 0 1 9 0" />
           <circle cx="17" cy="9" r="2.5" />
-          <path d="M15.2 18a4 4 0 0 1 4.3-3.3" />
+          <path d="M3.5 19a5.5 5.5 0 0 1 11 0" />
+          <path d="M14.5 18.5a4.5 4.5 0 0 1 6-3.7" />
+        </svg>
+      );
+    case 'user-plus':
+      return (
+        <svg {...sharedProps}>
+          <circle cx="9" cy="8" r="3" />
+          <path d="M4.5 18a4.5 4.5 0 0 1 9 0" />
+          <path d="M17 10v6M14 13h6" />
+        </svg>
+      );
+    case 'cleaning':
+      return (
+        <svg {...sharedProps}>
+          <path d="M8 11V4" />
+          <path d="M6 11h4" />
+          <path d="M5 20h14" />
+          <path d="M7 20v-5a3 3 0 0 1 3-3h1v8" />
+          <path d="M13 20v-8h1a3 3 0 0 1 3 3v5" />
+        </svg>
+      );
+    case 'card':
+      return (
+        <svg {...sharedProps}>
+          <rect x="4" y="6" width="16" height="12" rx="2" />
+          <path d="M4 10h16" />
+          <path d="M8 15h5" />
         </svg>
       );
     case 'finance':
       return (
         <svg {...sharedProps}>
-          <circle cx="12" cy="12" r="8.5" />
-          <path d="M14.5 9.3c0-1.1-1.1-1.8-2.5-1.8s-2.5.7-2.5 1.8c0 2.8 5 1.2 5 4 0 1.1-1.1 1.8-2.5 1.8s-2.5-.7-2.5-1.8" />
-          <path d="M12 6v12" />
+          <rect x="3" y="7" width="18" height="10" rx="2" />
+          <circle cx="12" cy="12" r="2.5" />
+          <path d="M7 10v4M17 10v4" />
         </svg>
       );
     case 'staff':
@@ -78,6 +125,32 @@ export default function DashboardIcon({ name, className = 'h-5 w-5' }) {
           <path d="M6 20V10" />
           <path d="M12 20V4" />
           <path d="M18 20v-7" />
+        </svg>
+      );
+    case 'products':
+      return (
+        <svg {...sharedProps}>
+          <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" />
+          <path d="m4 7.5 8 4.5 8-4.5" />
+          <path d="M12 12v9" />
+        </svg>
+      );
+    case 'categories':
+      return (
+        <svg {...sharedProps}>
+          <rect x="4" y="4" width="6" height="6" rx="1.5" />
+          <rect x="14" y="4" width="6" height="6" rx="1.5" />
+          <rect x="4" y="14" width="6" height="6" rx="1.5" />
+          <rect x="14" y="14" width="6" height="6" rx="1.5" />
+        </svg>
+      );
+    case 'inventory':
+      return (
+        <svg {...sharedProps}>
+          <path d="M4 8h16" />
+          <path d="M6 8v12h12V8" />
+          <path d="M8 4h8l2 4H6l2-4Z" />
+          <path d="M9 13h6" />
         </svg>
       );
     case 'settings':
@@ -153,6 +226,20 @@ export default function DashboardIcon({ name, className = 'h-5 w-5' }) {
       return (
         <svg {...sharedProps}>
           <path d="m9 18 6-6-6-6" />
+        </svg>
+      );
+    case 'chevron-down':
+      return (
+        <svg {...sharedProps}>
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      );
+    case 'more-vertical':
+      return (
+        <svg {...sharedProps}>
+          <circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none" />
         </svg>
       );
     default:

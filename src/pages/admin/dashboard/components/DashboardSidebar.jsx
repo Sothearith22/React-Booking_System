@@ -2,11 +2,9 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../../constants/appConstants';
 import { useAuth } from '../../../../features/auth';
 import DashboardIcon from './DashboardIcon';
-import { Loader2 } from 'lucide-react';
 
 export default function DashboardSidebar({ navItems = [] }) {
   const { user, logout } = useAuth();
-
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -14,77 +12,57 @@ export default function DashboardSidebar({ navItems = [] }) {
     navigate(ROUTES.LOGIN, { replace: true });
   };
 
-
   return (
-    <aside className="w-full xl:h-full xl:w-[280px] xl:shrink-0">
-      <div className="flex flex-col rounded-[2.25rem] border border-zinc-200 bg-white p-5 shadow-[0_22px_60px_-40px_rgba(58,94,160,0.38)] sm:p-6 xl:h-full xl:min-h-0 xl:overflow-hidden xl:rounded-[2.5rem]">
-        {/* Logo Section */}
-        <div className="mb-6 px-2 xl:mb-8">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500 text-white shadow-lg shadow-sky-200">
-              <DashboardIcon name="logo" className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-xl font-black tracking-tight text-zinc-950">Admin Panel</p>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Admin Panel</p>
-            </div>
+    <aside className="w-full border-r border-[#c7cbe0] bg-[#f0f2ff] xl:h-screen xl:w-[313px] xl:shrink-0">
+      <div className="flex h-full min-h-0 flex-col px-7 py-6">
+        <div className="flex items-center gap-5">
+          <img
+            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120"
+            alt=""
+            className="h-[50px] w-[50px] rounded-full object-cover"
+          />
+          <div className="min-w-0">
+            <p className="truncate text-[25px] font-bold leading-tight text-[#064ed0]">StayManager Pro</p>
+            <p className="mt-1 text-lg font-medium text-[#151827]">Property Admin</p>
           </div>
         </div>
 
-        {/* Navigation Section */}
-        <nav className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1 no-scrollbar">
-          <p className="mb-3 px-4 text-[10px] font-bold uppercase tracking-widest text-zinc-400">Main Menu</p>
-          <div className="grid gap-1.5 md:grid-cols-2 xl:grid-cols-1">
+        <nav className="mt-12 min-h-0 flex-1 overflow-y-auto pr-1">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
             {navItems.map((item) => (
               <NavLink
                 key={item.id}
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
-                  `group relative flex min-w-0 items-center gap-3.5 rounded-2xl px-4 py-3.5 text-sm font-bold transition-all duration-300 ${
+                  `group flex min-w-0 items-center gap-5 rounded-lg px-5 py-3.5 text-base font-semibold transition ${
                     isActive
-                      ? 'active bg-sky-500 text-white shadow-[0_12px_24px_-8px_rgba(14,165,233,0.5)]'
-                      : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                      ? 'bg-[#2f67e8] text-white shadow-[0_8px_18px_rgba(47,103,232,0.22)]'
+                      : 'text-[#1f2433] hover:bg-white/70 hover:text-[#064ed0]'
                   }`
                 }
               >
-                <DashboardIcon
-                  name={item.icon}
-                  className={`h-5 w-5 transition-transform duration-300 group-hover:scale-110`}
-                />
+                <DashboardIcon name={item.icon} className="h-5 w-5 shrink-0 transition-transform group-hover:scale-105" />
                 <span className="truncate">{item.label}</span>
-                {/* Active Indicator Pin */}
-                <div className={`absolute right-4 h-1.5 w-1.5 rounded-full bg-white opacity-0 transition-opacity duration-300 group-[.active]:opacity-100`} />
               </NavLink>
             ))}
           </div>
         </nav>
 
-        {/* Bottom Section: Profile & Logout — pinned to bottom via mt-auto */}
-        <div className="mt-6 border-t border-zinc-100 pt-6 xl:mt-auto">
-          <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-sm font-bold text-zinc-600">
-              {user?.name?.slice(0, 2).toUpperCase() || 'AD'}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold text-zinc-950">{user?.name || 'Admin User'}</p>
-              <p className="truncate text-xs text-zinc-400">{user?.email || 'admin@travelie.com'}</p>
-            </div>
-          </div>
-          
+        <div className="mt-8 space-y-4">
+          <NavLink
+            to="/admin/bookings"
+            className="flex w-full items-center justify-center gap-3 rounded-lg bg-[#1155cc] px-5 py-3 text-base font-semibold text-white shadow-[0_8px_18px_rgba(17,85,204,0.22)] transition hover:bg-[#064ed0]"
+          >
+            <DashboardIcon name="plus" className="h-5 w-5" />
+            Quick Booking
+          </NavLink>
           <button
             type="button"
             onClick={handleLogout}
-            className="group flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-bold text-rose-500 transition-all duration-300 hover:bg-rose-50"
+            className="w-full rounded-lg border border-[#c7cbe0] px-5 py-3 text-sm font-semibold text-[#5b6070] transition hover:border-[#064ed0] hover:text-[#064ed0]"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 transition-colors group-hover:bg-rose-200">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-            </div>
-            <span onClick={handleLogout}>Logout</span>
+            Logout {user?.name ? `(${user.name})` : ''}
           </button>
         </div>
       </div>
