@@ -148,52 +148,58 @@ export const CategoryRoomsPage = () => {
               const amenities = Array.isArray(room.amenities) ? room.amenities : [];
 
               return (
-                <article key={room.id || room.slug} className="bg-white">
-                  <div className="relative h-64 overflow-hidden">
-                    <img
-                      src={getRoomImage(room, index)}
-                      alt={room.name}
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                    />
-                    <span className="absolute bottom-3 left-4 bg-slate-900/85 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                      {room.is_active === false ? 'Unavailable' : 'Available'}
-                    </span>
-                  </div>
-
-                  <div className="pt-5">
-                    <h2 className="text-xl font-bold leading-snug text-slate-900">
-                      {room.name}
-                    </h2>
-                    <p className="mt-4 min-h-16 text-sm font-medium leading-6 text-slate-600">
-                      {room.description || 'A comfortable room ready for your next stay.'}
-                    </p>
-
-                    <div className="mt-5 grid grid-cols-2 border-y border-slate-200 py-3 text-sm font-semibold text-slate-700">
-                      <span className="flex items-center gap-2">
-                        <Users size={15} />
-                        {room.capacity || 1} {Number(room.capacity || 1) === 1 ? 'guest' : 'guests'}
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <BedDouble size={15} />
-                        Room
+                <Link
+                  key={room.id || room.slug}
+                  to={`/room-detail/${room.id}`}
+                  className="block group bg-white no-underline text-inherit hover:translate-y-[-2px] transition-transform duration-200"
+                >
+                  <article className="bg-white">
+                    <div className="relative h-64 overflow-hidden">
+                      <img
+                        src={getRoomImage(room, index)}
+                        alt={room.name}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <span className="absolute bottom-3 left-4 bg-slate-900/85 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                        {room.is_active === false ? 'Unavailable' : 'Available'}
                       </span>
                     </div>
 
-                    {amenities.length > 0 && (
-                      <p className="mt-4 min-h-14 text-xs font-medium leading-5 text-slate-500">
-                        Amenities: {amenities.join(', ')}
+                    <div className="pt-5">
+                      <h2 className="text-xl font-bold leading-snug text-slate-900 group-hover:text-orange-500 transition-colors">
+                        {room.name}
+                      </h2>
+                      <p className="mt-4 min-h-16 text-sm font-medium leading-6 text-slate-600">
+                        {room.description || 'A comfortable room ready for your next stay.'}
                       </p>
-                    )}
 
-                    <p className="mt-4 text-sm font-semibold text-slate-700">
-                      Prices start at:{' '}
-                      <span className="font-bold text-slate-950">
-                        {formatCurrency(room.price_per_night)}
-                      </span>{' '}
-                      per night
-                    </p>
-                  </div>
-                </article>
+                      <div className="mt-5 grid grid-cols-2 border-y border-slate-200 py-3 text-sm font-semibold text-slate-700">
+                        <span className="flex items-center gap-2">
+                          <Users size={15} />
+                          {room.capacity || 1} {Number(room.capacity || 1) === 1 ? 'guest' : 'guests'}
+                        </span>
+                        <span className="flex items-center gap-2">
+                          <BedDouble size={15} />
+                          Room
+                        </span>
+                      </div>
+
+                      {amenities.length > 0 && (
+                        <p className="mt-4 min-h-14 text-xs font-medium leading-5 text-slate-500">
+                          Amenities: {amenities.join(', ')}
+                        </p>
+                      )}
+
+                      <p className="mt-4 text-sm font-semibold text-slate-700">
+                        Prices start at:{' '}
+                        <span className="font-bold text-slate-950">
+                          {formatCurrency(room.price_per_night)}
+                        </span>{' '}
+                        per night
+                      </p>
+                    </div>
+                  </article>
+                </Link>
               );
             })}
           </div>
