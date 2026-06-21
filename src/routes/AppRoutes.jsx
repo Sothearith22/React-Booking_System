@@ -30,6 +30,8 @@ import { ProfilePage } from '../features/home/pages/ProfilePage';
 import { RoomPage } from '../features/home/pages/RoomPage';
 import { AboutPage } from '../features/home/pages/AboutPage';
 import { CategoryRoomsPage } from '../features/home/pages/CategoryRoomsPage';
+import BookingDetail from '../features/home/components/BookingDetail';
+
 
 const AppRoutes = () => {
   return (
@@ -96,6 +98,7 @@ const AppRoutes = () => {
           <Route path={ROUTES.CUSTOMER_PROFILE.slice(1)} element={<ProfilePage />} />
           <Route path={ROUTES.CUSTOMER_ROOM.slice(1)} element={<RoomPage />} />
           <Route path="room/:categoryId" element={<CategoryRoomsPage />} />
+          <Route path={ROUTES.CUSTOMER_ROOM_DETAIL.slice(1)} element={<BookingDetail />} />
         </Route>
       </Route>
 

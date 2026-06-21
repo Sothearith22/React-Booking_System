@@ -30,6 +30,7 @@ export const ROUTES = {
   CUSTOMER_SERVICE: '/service',
   CUSTOMER_ABOUT: '/about',
   CUSTOMER_CONTACT: '/contact',
+  CUSTOMER_ROOM_DETAIL: '/room-detail/:roomId',
 };
 
 export const BOOKING_STATUS = {

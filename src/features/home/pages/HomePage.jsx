@@ -2,7 +2,7 @@ import React from 'react'
 import { Banner } from '../components/Banner'
 import { BookingBenefits } from '../components/BookingBenefits'
 import { PopularRoom } from '../components/PopularRoom'
-import TopCategories from '../components/TopCategories'
+import TopCategories from '../components/Room/TopCategories'
 
 export const HomePage = () => {
   return (
